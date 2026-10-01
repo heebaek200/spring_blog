@@ -32,7 +32,8 @@ spring:
     # data.sql을 테이블 생성 후에 실행한다.
     defer-datasource-initialization: true
 
-#  sql:
-#    init:
-#      data-locations:
-#        - classpath:db/data.sql
+  # 서버 시작 시 이 파일 실행
+  sql:
+    init:
+      data-locations:
+        - classpath:db/data.sql
