@@ -18,6 +18,10 @@
             </form>
         </div>
     </div>
+
+    {{#errorMessage}}
+    <div class="alert alert-danger mt-3">{{errorMessage}}</div>
+    {{/errorMessage}}
 </div>
 
 {{> layout/footer}}

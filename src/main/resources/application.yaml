@@ -5,3 +5,6 @@ spring:
     name: spring_blog
   profiles:
     active: local
+  mustache:
+    servlet:
+      expose-session-attributes: true   # Mustache 파일에서 세션값 사용
