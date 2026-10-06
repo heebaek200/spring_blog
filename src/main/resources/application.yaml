@@ -8,3 +8,8 @@ spring:
   mustache:
     servlet:
       expose-session-attributes: true   # Mustache 파일에서 세션값 사용
+
+server:
+  servlet:
+    session:
+      tracking-modes: cookie    # 세션 번호를 쿠키로만 전달 (주소에 ;jsessionid 를 붙이지 않음)
