@@ -101,13 +101,14 @@ public class BoardController {
     public String save(BoardRequest.SaveDto reqDto) {
 
         // DTO에서 Entity 클래스 타입으로 변환
-        Board board = Board.builder()
-                .title(reqDto.getTitle())
-                .content(reqDto.getContent())
-                .username(reqDto.getUsername())
-                .build();
-
-        Board boardEntity = boardPersistenceRepository.save(board);
+        // TODO - 수정예정
+//        Board board = Board.builder()
+//                .title(reqDto.getTitle())
+//                .content(reqDto.getContent())
+//                .user(reqDto.getUsername())
+//                .build();
+//
+//        Board boardEntity = boardPersistenceRepository.save(board);
 
         return "redirect:/";
     }

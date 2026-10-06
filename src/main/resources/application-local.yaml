@@ -1,5 +1,36 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    com.tenco.spring_blog: DEBUG
+
 spring:
-  application:
-    name: spring_blog
-  profiles:
-    active: dev
+  # 데이터베이스 연결 (MySQL)
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DEV_DB_URL}
+    username: ${DEV_DB_USERNAME}
+    password: ${DEV_DB_PASSWORD}
+
+  # JPA 설정
+  jpa:
+    hibernate:
+      # 운영환경에서는 create를 쓰지 않습니다. 없는 테이블과 컬럼만 추가합니다.
+      ddl-auto: create
+    # 실행되는 SQL을 콘솔에 출력한다.
+    show-sql: true
+    properties:
+      hibernate:
+        default_batch_fetch_size: 10
+        format_sql: true    # 출력되는 SQL을 콘솔창에 줄바꿈해 보기좋게 표시
+    # data.sql을 테이블 생성 후에 실행한다.
+    defer-datasource-initialization: true
+
+  # 서버 시작 시 이 파일 실행
+  sql:
+    init:
+      mode: always
+      data-locations:
+        - classpath:db/data.sql

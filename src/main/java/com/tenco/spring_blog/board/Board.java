@@ -1,5 +1,6 @@
 package com.tenco.spring_blog.board;
 
+import com.tenco.spring_blog.user.User;
 import com.tenco.spring_blog.util.MyDateUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,12 @@ public class Board {
 
     private String title;
     private String content;
-    private String username;
+
+//    private String username;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @CreationTimestamp
     private Timestamp createdAt;
@@ -30,11 +36,16 @@ public class Board {
     // 비즈니스 로직을 위한 생성자 설계
     // id와 createAt은 JPA가 자동으로 설정하므로 매개변수에서 제외
     @Builder
-    public Board(String title, String content, String username) {
+    public Board(String title, String content, User user) {
         this.title = title;
         this.content = content;
-        this.username = username;
+        this.user = user;
     }
+//    public Board(String title, String content, String username) {
+//        this.title = title;
+//        this.content = content;
+//        this.username = username;
+//    }
 
     // 자신의 상태값을 변경하는 메서드 추가 (영속성 엔티티 수정 메서드)
     public void update(BoardRequest.UpdateDto updateDto) {

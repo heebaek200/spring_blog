@@ -1,5 +1,7 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: spring_blog
   profiles:
-    active: dev
+    active: local

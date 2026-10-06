@@ -130,19 +130,4 @@ public class BoardPersistenceRepository {
         // 4. 영속 상태의  객체를 반환
         //  - 자동으로 생성된 id값 등을 포함된 객체가 반환됨.
     }
-
-    // 엔티티의 영속 상태 4가지 확인
-    private void entityLifecycleEx() {
-        // 1. 비영속 상태
-        Board board = new Board("제목", "내용", "작성자");
-
-        // 2. 영속 상태
-        em.persist(board);
-
-        // 3. 준영속 상태
-        em.detach(board);
-
-        // 4. 삭제 예정 상태
-        em.remove(board);
-    }
 }
