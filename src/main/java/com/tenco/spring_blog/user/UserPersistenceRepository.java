@@ -12,6 +12,25 @@ public class UserPersistenceRepository {
 
     private final EntityManager em;
 
+    // 회원 정보 조회 - 수정폼 용
+    public User findById(Long id) {
+        // PK 값으로 조회하므로 find 사용
+        User user = em.find(User.class, id);
+
+        if (user == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+
+        return user;
+    }
+
+    @Transactional
+    public User update(User user, UserRequest.UpdateDto updateDto) {
+        user.update(updateDto);
+
+        return user;
+    }
+
     // 회원 정보 조회 - 로그인 (사용자 이름, 비밀번호 확인)
     public User findByUsernameAndPassword(String username, String password) {
         try {

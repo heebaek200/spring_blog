@@ -1,10 +1,8 @@
 package com.tenco.spring_blog.user;
 
+import com.tenco.spring_blog.board.BoardRequest;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -23,6 +21,7 @@ public class User {
     // Unique 제약
     @Column(unique = true)
     private String username;
+    @Setter
     private String password;
     @Column(unique = true)
     private String email;
@@ -35,6 +34,10 @@ public class User {
         this.username = username;
         this.password = password;
         this.email = email;
+    }
+
+    public void update(UserRequest.UpdateDto updateDto) {
+        this.password = updateDto.getPassword();
     }
 
 }
