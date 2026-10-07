@@ -56,6 +56,10 @@ public class Board {
         this.content = updateDto.getContent();
     }
 
+    public boolean isOwner(Long userId) {
+        return this.user.getId().equals(userId);
+    }
+
     // 시간 포맷 메서드 추가
     public String getTime() {
         return MyDateUtil.timestampFormat(createdAt);
