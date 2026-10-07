@@ -1,5 +1,8 @@
 package com.tenco.spring_blog.controller;
 
+import com.tenco.spring_blog._core.error.Exception400;
+import com.tenco.spring_blog._core.error.Exception404;
+import com.tenco.spring_blog._core.util.Define;
 import com.tenco.spring_blog.user.User;
 import com.tenco.spring_blog.user.UserPersistenceRepository;
 import com.tenco.spring_blog.user.UserRequest;
@@ -30,34 +33,23 @@ public class userContoller {
     // POST http://localhost:8080/join
     @PostMapping("/join")
     public String join(UserRequest.JoinDto joinDto, Model model) {
-        log.info("=== 회원가입 요청 ===");
-        log.info("사용자명 : {}", joinDto.getUsername());
-        log.info("비밀번호 : {}", joinDto.getPassword());
-        log.info("이메일 : {}", joinDto.getEmail());
+        // 1 유효성 검사
+        joinDto.validate();
 
-        try {
-            // 1 유효성 검사
-            joinDto.validate();
-
-            // 2. 사용자명 중복 체크
-            User existingUser = userPersistenceRepository.findByUsername(joinDto.getUsername());
-            if (existingUser != null) {
-                throw new IllegalArgumentException("이미 존재하는 사용자명입니다.");
-            }
-
-            // 3. DTO 객체를 Entity로 변환
-            User user = joinDto.toEntity();
-
-            // 4. DB에 회원정보 저장
-            User userEntity = userPersistenceRepository.save(user);
-
-            // 회원 가입 성공 시 로그인 화면으로 이동
-            return "redirect:/login";
-        } catch (Exception e) {
-            log.error("회원가입 실패 : {}", e.getMessage());
-            model.addAttribute("errorMessage", e.getMessage());
-            return "user/join-form";
+        // 2. 사용자명 중복 체크
+        User existingUser = userPersistenceRepository.findByUsername(joinDto.getUsername());
+        if (existingUser != null) {
+            throw new Exception400("이미 존재하는 사용자명입니다.");
         }
+
+        // 3. DTO 객체를 Entity로 변환
+        User user = joinDto.toEntity();
+
+        // 4. DB에 회원정보 저장
+        User userEntity = userPersistenceRepository.save(user);
+
+        // 회원 가입 성공 시 로그인 화면으로 이동
+        return "redirect:/login";
     }
 
     // GET http://localhost:8080/login
@@ -71,40 +63,29 @@ public class userContoller {
     // 로그인 처리 (반드시 POST 요청)
     @PostMapping("/login")
     public String login(UserRequest.LoginDto loginDto, HttpSession session, Model model) {
-        log.info("=== 로그인 요청 ===");
-        log.info("사용자명 : {}", loginDto.getUsername());
+        // 1. 입력 데이터 검증
+        loginDto.validate();
 
-        try {
-            // 1. 입력 데이터 검증
-            loginDto.validate();
+        // 2. 사용자명과 비밀번호로 사용자 조회
+        User sessionUser = userPersistenceRepository.findByUsernameAndPassword(
+                loginDto.getUsername(),
+                loginDto.getPassword()
+        );
 
-            // 2. 사용자명과 비밀번호로 사용자 조회
-            User sessionUser = userPersistenceRepository.findByUsernameAndPassword(
-                    loginDto.getUsername(),
-                    loginDto.getPassword()
-            );
-
-            // 3. 로그인 실패 처리
-            if (sessionUser == null) {
-                // 로그인 실패 : 일치하는 사용자 없음
-                throw new IllegalArgumentException("사용자명 또는 비밀번호가 올바르지 않습니다.");
-            }
-
-            // 4. 로그인 성공 : 세션에 사용자 정보를 저장
-            sessionUser.setPassword(null);  // 보안
-            session.setAttribute("sessionUser", sessionUser);
-
-            log.info("로그인한 사용자 : {}", sessionUser.getUsername());
-
-            // 5. 메인 페이지로 리다이렉트 처리
-            return "redirect:/";
-
-        } catch (Exception e) {
-            // 로그인 실패 시 에러 메시지와 함께 로그인 폼으로 돌려보내기
-            model.addAttribute("errorMessage", e.getMessage());
-
-            return "user/login-form";
+        // 3. 로그인 실패 처리
+        if (sessionUser == null) {
+            // 로그인 실패 : 일치하는 사용자 없음
+            throw new Exception400("사용자명 또는 비밀번호가 올바르지 않습니다.");
         }
+
+        // 4. 로그인 성공 : 세션에 사용자 정보를 저장
+        sessionUser.setPassword(null);  // 보안
+        session.setAttribute(Define.SESSION_USER, sessionUser);
+
+        log.info("로그인한 사용자 : {}", sessionUser.getUsername());
+
+        // 5. 메인 페이지로 리다이렉트 처리
+        return "redirect:/";
     }
 
     // GET http://localhost:8080/user/update
@@ -115,7 +96,7 @@ public class userContoller {
     ) {
 
         // 1. 인증검사
-        User sessionUser = (User) session.getAttribute("sessionUser");
+        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
         if (sessionUser == null) {
             return "redirect:login";
         }
@@ -134,51 +115,39 @@ public class userContoller {
             Model model
     ) {
         // 1. 인증검사
-        User sessionUser = (User) session.getAttribute("sessionUser");
+        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
         if (sessionUser == null) {
             return "redirect:/login";
         }
 
-        try {
-            // 2. 권한검사
-            // 다른 사람의 정보는 수정할 수 없음
-            User user = userPersistenceRepository.findById(sessionUser.getId());
-            if (user == null) {
-                throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-            }
-
-            // 3. 유효성검사
-            updateDto.validate();
-
-            // 수정
-            user = userPersistenceRepository.update(user, updateDto);
-
-            // 4. 세션 동기화 : 수정된 정보를 세션에 반영
-            user.setPassword(null);  // 보안
-            session.setAttribute("sessionUser", user);
-
-            // 5. 성공 후 메인페이지로 리다이렉트
-            return "redirect:/";
-        } catch (Exception e) {
-            model.addAttribute("user", userPersistenceRepository.findById(sessionUser.getId()));
-            return "user/update-form";
+        // 2. 권한검사
+        // 다른 사람의 정보는 수정할 수 없음
+        User user = userPersistenceRepository.findById(sessionUser.getId());
+        if (user == null) {
+            throw new Exception404("사용자를 찾을 수 없습니다.");
         }
 
+        // 3. 유효성검사
+        updateDto.validate();
 
+        // 수정
+        user = userPersistenceRepository.update(user, updateDto);
+
+        // 4. 세션 동기화 : 수정된 정보를 세션에 반영
+        user.setPassword(null);  // 보안
+        session.setAttribute(Define.SESSION_USER, user);
+
+        // 5. 성공 후 메인페이지로 리다이렉트
+        return "redirect:/";
     }
 
     // GET http://localhost:8080/logout
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        log.info("== 로그아웃 요청 ==");
-
         // 세션 무효화 처리
         session.invalidate();
-        log.info("로그아웃 완료");
 
         return "redirect:/";
     }
-
-
 
 }
