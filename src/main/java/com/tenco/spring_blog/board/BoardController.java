@@ -9,12 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Slf4j // 로거
 @RequiredArgsConstructor // DI처리
@@ -150,11 +147,31 @@ public class BoardController {
     @GetMapping("/board/{id}/update")
     public String updateForm(
             @PathVariable(name = "id") Long id,
-            Model model
+            Model model,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
     ) {
+        // 1. 인증검사
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        
+        // 2. 권한 체크를 위한
+        Board board = boardPersistenceRepository.findById(id);
+
+        try {
+            // 3. 권한 체크
+            if (!board.isOwner(sessionUser.getId())) {
+                throw new RuntimeException("수정 권한이 없습니다.");
+            }
+        } catch (Exception e) {
+            // 권한이 없음 또는 다른 오류
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/board/" + id;
+        }
 
         // 수정하기 화면 요청 (먼저 조회부터)
-        Board board = boardPersistenceRepository.findById(id);
         model.addAttribute("board", board);
 
         return "board/update-form";
@@ -175,14 +192,39 @@ public class BoardController {
     @PostMapping("/board/{id}/update")
     public String update(
             @PathVariable(name = "id") Long id,
-            BoardRequest.UpdateDto reqDto
+            BoardRequest.UpdateDto updateDto,
+            HttpSession session,
+            Model model
     ) {
-        reqDto.validate();  // 유효성 검사 실패 (throw)
+        // 1. 인증검사
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
 
-        boardPersistenceRepository.updateById(id, reqDto);
+        // 2. 권한검사
+        Board boardEntity = boardPersistenceRepository.findById(id);
+        try {
+            if (! boardEntity.isOwner(sessionUser.getId())) {
+                throw new RuntimeException("수정 권한이 없습니다.");
+            }
 
-        // PRG 패턴
-        return "redirect:/board/" + id;
+            // 3. 유효성검사
+            updateDto.validate();  // 유효성 검사 실패 (throw)
+
+            // 4. Dirty Checking을 통한 수정 실행
+            boardPersistenceRepository.updateById(id, updateDto);
+
+            // 5. 수정 완료 후 PRG 패턴(상세 페이지로 이동)
+            return "redirect:/board/" + id;
+
+        } catch (Exception e) {
+            model.addAttribute("board", boardEntity);
+            model.addAttribute("errorMesssage", e.getMessage());
+
+            // 뷰 리졸브 활용
+            return "board/update-form";
+        }
     }
 
     // 게시글 삭제
