@@ -73,6 +73,11 @@ public class userContoller {
         );
 
         // 3. 로그인 실패 처리 -> 인터셉터
+        if (sessionUser == null) {
+            throw new Exception400(
+                    "사용자명 또는 비밀번호가 올바르지 않습니다."
+            );
+        }
 
         // 4. 로그인 성공 : 세션에 사용자 정보를 저장
         sessionUser.setPassword(null);  // 보안
