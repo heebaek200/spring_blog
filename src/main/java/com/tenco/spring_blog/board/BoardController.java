@@ -52,12 +52,6 @@ public class BoardController {
     // GET http://localhost:8080/board/save (화면 요청)
     @GetMapping("/board/save")
     public String saveForm(HttpSession session) {
-        // 1. 인증 검사 : 로그인 안된 사용자는 이 페이지에 접근 못하게 처리
-        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-        if (sessionUser == null) {
-            return "redirect:/login";
-        }
-
         return "board/save-form";
     }
 
@@ -71,9 +65,7 @@ public class BoardController {
     ) {
         // 1. 인증검사
         User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-        if (sessionUser == null) {
-            return "redirect:/login";
-        }
+
         // 2. 유효성 검사
         // 입력 데이터 검증
         saveDto.validate();
@@ -96,9 +88,6 @@ public class BoardController {
     ) {
         // 1. 인증검사
         User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-        if (sessionUser == null) {
-            return "redirect:/login";
-        }
         
         // 2. 권한 체크를 위한
         Board board = boardPersistenceRepository.findById(id);
@@ -123,9 +112,6 @@ public class BoardController {
     ) {
         // 1. 인증검사
         User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-        if (sessionUser == null) {
-            return "redirect:/login";
-        }
 
         // 2. 권한검사
         Board boardEntity = boardPersistenceRepository.findById(id);
@@ -157,9 +143,6 @@ public class BoardController {
 
         // 1.
         User sessionUser = (User)session.getAttribute(Define.SESSION_USER);
-        if (sessionUser == null) {
-            return "redirect:/login";
-        }
 
         // 2.
         // 삭제할 게시글 조회

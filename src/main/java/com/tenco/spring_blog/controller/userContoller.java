@@ -72,11 +72,7 @@ public class userContoller {
                 loginDto.getPassword()
         );
 
-        // 3. 로그인 실패 처리
-        if (sessionUser == null) {
-            // 로그인 실패 : 일치하는 사용자 없음
-            throw new Exception400("사용자명 또는 비밀번호가 올바르지 않습니다.");
-        }
+        // 3. 로그인 실패 처리 -> 인터셉터
 
         // 4. 로그인 성공 : 세션에 사용자 정보를 저장
         sessionUser.setPassword(null);  // 보안
@@ -97,9 +93,6 @@ public class userContoller {
 
         // 1. 인증검사
         User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-        if (sessionUser == null) {
-            return "redirect:login";
-        }
 
         User user = userPersistenceRepository.findById(sessionUser.getId());
         model.addAttribute("user", user);
@@ -116,9 +109,6 @@ public class userContoller {
     ) {
         // 1. 인증검사
         User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-        if (sessionUser == null) {
-            return "redirect:/login";
-        }
 
         // 2. 권한검사
         // 다른 사람의 정보는 수정할 수 없음
