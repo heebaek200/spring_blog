@@ -20,13 +20,13 @@ import java.util.List;
 @Controller
 public class BoardController {
 
-    private final BoardPersistenceRepository boardPersistenceRepository;
+    private final BoardService boardService;
 
     // GET http://localhost:8080/
     // GET http://localhost:8080/board/list
     @GetMapping({"/", "/board/list"})
     public String list(Model model) {
-        List<Board> boardList = boardPersistenceRepository.findAll();
+        List<Board> boardList = boardService.findAll();
         model.addAttribute("boardList", boardList);
 
         return "board/list";
@@ -38,12 +38,7 @@ public class BoardController {
             @PathVariable(name = "id") Long id,
             Model model
     ) {
-//        Board board = boardPersistenceRepository.findById(id);
-        Board board = boardPersistenceRepository.findByWithJPQL(id);
-        if (board == null) {
-            // 추후 404 에러 페이지를 만들어서 처리할 예정
-            throw new Exception404("게시물을 찾을 수 없습니다. : " + id);
-        }
+        Board board = boardService.findByid(id);
 
         model.addAttribute("board", board);
         return "board/detail";
@@ -63,22 +58,16 @@ public class BoardController {
             BoardRequest.SaveDto saveDto,
             HttpSession session
     ) {
-        // 1. 인증검사
-        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-
-        // 2. 유효성 검사
-        // 입력 데이터 검증
+        // 유효성 검사
         saveDto.validate();
 
-        // DTO에서 Board 객체 생성
-        Board board = saveDto.toEntity(sessionUser);
-
-        // Board 저장
-        Board savedBoard = boardPersistenceRepository.save(board);
+        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
+        boardService.save(saveDto, sessionUser);
 
         return "redirect:/";
     }
 
+    // TODO : Response 구현 후 인가 처리
     // GET http://localhost:8080/board/1/update (수정 화면)
     @GetMapping("/board/{id}/update")
     public String updateForm(
@@ -86,15 +75,11 @@ public class BoardController {
             Model model,
             HttpSession session
     ) {
-        // 1. 인증검사
-        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-        
-        // 2. 권한 체크를 위한
-        Board board = boardPersistenceRepository.findById(id);
+        Board board = boardService.findByid(id);
 
-        // 3. 권한 체크
-        if (!board.isOwner(sessionUser.getId())) {
-            throw new Exception403("수정 권한이 없습니다.");
+        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
+        if (! board.isOwner(sessionUser.getId())) {
+            throw new Exception403("수정할 권한이 없습니다.");
         }
 
         // 수정하기 화면 요청 (먼저 조회부터)
@@ -110,23 +95,12 @@ public class BoardController {
             BoardRequest.UpdateDto updateDto,
             HttpSession session
     ) {
-        // 1. 인증검사
-        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-
-        // 2. 권한검사
-        Board boardEntity = boardPersistenceRepository.findById(id);
-
-        if (! boardEntity.isOwner(sessionUser.getId())) {
-            throw new Exception403("수정 권한이 없습니다.");
-        }
-
-        // 3. 유효성검사
         updateDto.validate();  // 유효성 검사 실패 (throw)
 
-        // 4. Dirty Checking을 통한 수정 실행
-        boardPersistenceRepository.updateById(id, updateDto);
+        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
+        boardService.updateById(id, updateDto, sessionUser);
 
-        // 5. 수정 완료 후 PRG 패턴(상세 페이지로 이동)
+        // 수정 완료 후 PRG 패턴(상세 페이지로 이동)
         return "redirect:/board/" + id;
     }
 
@@ -137,26 +111,10 @@ public class BoardController {
             @PathVariable Long id,
             HttpSession session
     ) {
-        // 1. 인증 검사
-        // 2. 권한 확인
-        // 2.1 - 관리자 권한이 있다면 통과
-
-        // 1.
         User sessionUser = (User)session.getAttribute(Define.SESSION_USER);
 
-        // 2.
-        // 삭제할 게시글 조회
-        Board boardEntity = boardPersistenceRepository.findById(id);
+        boardService.deleteById(id, sessionUser);
 
-        // 3. 권한 체크: 본인이 작성한 게시글만 삭제
-        if (!boardEntity.isOwner(sessionUser.getId())) {
-            throw new Exception403("삭제 권한이 없습니다.");
-        }
-
-        // 4. 권한 확인 후 삭제 실행
-        boardPersistenceRepository.deleteById(id);
-
-        // 5. 삭제 성공 후 메인 페이지 리다이렉트
         return "redirect:/";
     }
 
