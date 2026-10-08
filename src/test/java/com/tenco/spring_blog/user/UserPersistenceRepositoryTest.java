@@ -4,14 +4,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
-@Import(UserPersistenceRepository.class)
 @DataJpaTest
 public class UserPersistenceRepositoryTest {
 
     @Autowired
-    private UserPersistenceRepository userPersistenceRepository;
+    private UserJpaRepository userJpaRepository;
 
     // 단위 테스트할 메서드를 설계
     @Test
@@ -27,7 +25,7 @@ public class UserPersistenceRepositoryTest {
         System.out.println("저장 전 User : " + user);
 
         // when: 회원 가입 실행
-        User savedUser = userPersistenceRepository.save(user);
+        User savedUser = userJpaRepository.save(user);
 
         // then: 저장된 결과를 검증
         // 1. 자동 생성된 ID 값 확인
@@ -53,7 +51,7 @@ public class UserPersistenceRepositoryTest {
         String username = "xxxxx";
 
         // when
-        User notFoundUser = userPersistenceRepository.findByUsername(username);
+        User notFoundUser = userJpaRepository.findByUsername(username).orElse(null);
 
         // then
         // null 여부 확인
@@ -74,14 +72,14 @@ public class UserPersistenceRepositoryTest {
                 .email("test@email.com")
                 .build();
 
-        userPersistenceRepository.save(user);
+        userJpaRepository.save(user);
 
         String username = "testUser";
         String password = "3456";
 
         // when: 올바른 사용자명과 비밀번호로 로그인 조회
         User foundUser =
-                userPersistenceRepository.findByUsernameAndPassword(username, password);
+                userJpaRepository.findByUsernameAndPassword(username, password).orElse(null);
 
         // then: 로그인에 성공하여 사용자가 조회되어야 함
         Assertions.assertThat(foundUser).isNotNull();
@@ -105,14 +103,14 @@ public class UserPersistenceRepositoryTest {
                 .email("test@email.com")
                 .build();
 
-        userPersistenceRepository.save(user);
+        userJpaRepository.save(user);
 
         String username = "testUser";
         String password = "9999";
 
         // when: 잘못된 비밀번호로 로그인 조회
         User foundUser =
-                userPersistenceRepository.findByUsernameAndPassword(username, password);
+                userJpaRepository.findByUsernameAndPassword(username, password).orElse(null);
 
         // then: 일치하는 사용자가 없으므로 null 반환
         Assertions.assertThat(foundUser).isNull();
@@ -131,7 +129,7 @@ public class UserPersistenceRepositoryTest {
 
         // when: 존재하지 않는 사용자명으로 로그인 조회
         User foundUser =
-                userPersistenceRepository.findByUsernameAndPassword(username, password);
+                userJpaRepository.findByUsernameAndPassword(username, password).orElse(null);
 
         // then: 일치하는 사용자가 없으므로 null 반환
         Assertions.assertThat(foundUser).isNull();

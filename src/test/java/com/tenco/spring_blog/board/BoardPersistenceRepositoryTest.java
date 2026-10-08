@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
-@Import(BoardJpaRepository.class)
 @DataJpaTest
 public class BoardPersistenceRepositoryTest {
 
@@ -18,7 +17,7 @@ public class BoardPersistenceRepositoryTest {
     public void save_연관관계_포함_게시글_저장_테스트() {
         // given
         // 1. User 객체 생성 (실제로는 세션에서 가져온다.)
-        User user = new User(1L, "tester", "1234", "a@naver.com", null);
+        User user = new User(1L, "tester", "1234", "a@naver.com", null, false);
         Board board = Board.builder()
                 .title("테스트 글")
                 .content("테스트 내용")
@@ -56,7 +55,8 @@ public class BoardPersistenceRepositoryTest {
                 "testuser",
                 "1234",
                 "a@naver.com",
-                null
+                null,
+                false
         );
 
         // 2. 삭제할 게시글 객체 생성
@@ -79,7 +79,7 @@ public class BoardPersistenceRepositoryTest {
 
         // then
         // 6. 삭제된 게시글을 다시 조회
-        Board deletedBoard = boardPersistenceRepository.findById(boardId);
+        Board deletedBoard = boardPersistenceRepository.findById(boardId).orElse(null);
 
         // 7. 삭제된 게시글은 조회되지 않아야 함
         Assertions.assertThat(deletedBoard).isNull();

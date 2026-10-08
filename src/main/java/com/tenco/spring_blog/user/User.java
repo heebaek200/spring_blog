@@ -3,6 +3,7 @@ package com.tenco.spring_blog.user;
 import com.tenco.spring_blog.board.BoardRequest;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -28,6 +29,10 @@ public class User {
 
     @CreationTimestamp
     private Timestamp createdAt;
+
+    // 블랙리스트
+    @ColumnDefault("false")
+    private Boolean banned = false;
 
     @Builder
     public User(String username, String password, String email) {
