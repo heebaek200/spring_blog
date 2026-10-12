@@ -25,14 +25,16 @@ public class UserService {
     public User join(UserRequest.JoinDto joinDto) {
         log.info("회원가입 서비스 처리 시작");
 
-//        userJpaRepository.findByUsername(joinDto.getUsername()).orElseThrow(() -> {
-//            log.warn("회원가입 실패 - 중복된 사용자명 : {}", joinDto.getUsername());
-//            return new Exception400("이미 존재하는 사용자명입니다.");
-//        });
         // 중복체크
         userJpaRepository.findByUsername(joinDto.getUsername()).ifPresent(user -> {
             log.warn("회원가입 실패 - 중복된 사용자명");
             throw new Exception400("이미 존재하는 사용자명입니다."); // 찾아보니까 원랜 409래
+        });
+
+        // 이메일 중복체크
+        userJpaRepository.findByEmail(joinDto.getEmail()).ifPresent(user -> {
+            log.warn("회원가입 실패 - 중복된 이메일");
+            throw new Exception400("이미 사용 중인 이메일입니다.");
         });
 
         User savedUser = userJpaRepository.save(joinDto.toEntity());

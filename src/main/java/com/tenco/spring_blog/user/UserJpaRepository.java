@@ -38,6 +38,12 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
             @Param("username") String username
     );
 
+    // 이메일 중복 체크:
+    @Query("SELECT u FROM User AS u WHERE u.email = :email")
+    Optional<User> findByEmail(
+            @Param("email") String email
+    );
+
     // 사용자 정보 업데이트는 JPA의 더티 체킹을 활용하므로 만들지 않음
 
 }

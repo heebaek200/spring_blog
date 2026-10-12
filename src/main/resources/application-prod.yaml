@@ -21,5 +21,8 @@ spring:
       ddl-auto: update
     # 실행되는 SQL을 콘솔에 출력한다.
     show-sql: true
+    properties:
+      hibernate:
+        default_batch_fetch_size: 10
     # data.sql을 테이블 생성 후에 실행한다.
     defer-datasource-initialization: true
