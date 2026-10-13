@@ -34,11 +34,19 @@ public class BoardController {
     @GetMapping("/board/{id}")
     public String detail(
             @PathVariable(name = "id") Long id,
-            Model model
+            Model model,
+            HttpSession session
     ) {
         BoardResponse.DetailDto detailDto = boardService.findById(id);
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
 
         model.addAttribute("board", detailDto);
+
+        // 수정 및 삭제 버튼 표시 비표시 용 플래그
+        // 로그인했으며, 작성자 본인일 때만 수정 삭제 버튼 표시
+        boolean isOwner = sessionUserDto != null && detailDto.getUserId().equals(sessionUserDto.getId());
+        model.addAttribute("isOwner", isOwner);
+
         return "board/detail";
     }
 

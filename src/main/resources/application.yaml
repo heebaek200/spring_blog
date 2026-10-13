@@ -7,7 +7,7 @@ spring:
     active: local
   mustache:
     servlet:
-      expose-session-attributes: true   # Mustache 파일에서 세션값 사용
+      expose-session-attributes: false   # Mustache 파일에서 세션값 미사용
   jpa:
     open-in-view: false # OSIV 비적용. 트랜잭션이 끝나면 영속성 컨텍스트 지연 로딩 불가.
     properties:
