@@ -62,8 +62,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String ex403(
             Exception403 e,
-            HttpServletRequest request,
-            Model model
+            HttpServletRequest request
     ) {
         log.warn("==== 403 Forbidden 발생 ====");
         log.warn("요청 URL : {}", request.getRequestURL());
