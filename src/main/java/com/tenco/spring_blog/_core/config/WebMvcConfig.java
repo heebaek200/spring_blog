@@ -1,6 +1,5 @@
 package com.tenco.spring_blog._core.config;
 
-import com.tenco.spring_blog._core.interceptor.BlackListInterceptor;
 import com.tenco.spring_blog._core.interceptor.IpBlockInterceptor;
 import com.tenco.spring_blog._core.interceptor.LoginInterceptor;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final LoginInterceptor loginInterceptor;
     private final IpBlockInterceptor ipBlockInterceptor;
-    private final BlackListInterceptor blackListInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -27,8 +25,5 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         // IpBlockInterceptor를 시스템에 등록
         registry.addInterceptor(ipBlockInterceptor);
-
-        // BlackListInterceptor를 시스템에 등록
-        registry.addInterceptor(blackListInterceptor);
     }
 }

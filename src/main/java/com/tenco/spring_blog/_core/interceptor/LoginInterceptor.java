@@ -2,7 +2,7 @@ package com.tenco.spring_blog._core.interceptor;
 
 import com.tenco.spring_blog._core.error.Exception401;
 import com.tenco.spring_blog._core.util.Define;
-import com.tenco.spring_blog.user.User;
+import com.tenco.spring_blog.user.SessionUserDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -18,7 +18,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         HttpSession session = request.getSession(false);
-        User sessionUser = (session == null) ? null : (User) session.getAttribute(Define.SESSION_USER);
+        SessionUserDto sessionUser = (session == null) ? null : (SessionUserDto) session.getAttribute(Define.SESSION_USER);
         if (sessionUser == null) {
             throw new Exception401("로그인 먼저 해주세요");
         }

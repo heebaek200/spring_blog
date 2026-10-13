@@ -49,11 +49,8 @@ public class userContoller {
         // 입력 데이터 검증
         loginDto.validate();
 
-        User user = userService.login(loginDto);
-
-        // 로그인 성공 : 세션에 사용자 정보를 저장
-        user.setPassword(null);  // 보안
-        session.setAttribute(Define.SESSION_USER, user);
+        SessionUserDto sessionUserDto = userService.login(loginDto);
+        session.setAttribute(Define.SESSION_USER, sessionUserDto);
 
         // 메인 페이지로 리다이렉트 처리
         return "redirect:/";
@@ -65,10 +62,10 @@ public class userContoller {
             Model model,
             HttpSession session
     ) {
-        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-        User user = userService.findById(sessionUser.getId());
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+        UserResponse.UpdateFormDto updateFormDto = userService.findUpdateForm(sessionUserDto.getId());
 
-        model.addAttribute("user", user);
+        model.addAttribute("user", updateFormDto);
 
         return "user/update-form";
     }
@@ -77,18 +74,16 @@ public class userContoller {
     @PostMapping("/user/update")
     public String update(
             UserRequest.UpdateDto updateDto,
-            HttpSession session,
-            Model model
+            HttpSession session
     ) {
         updateDto.validate();
 
-        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
 
-        User user = userService.updateById(sessionUser.getId(), updateDto);
+        SessionUserDto updateUserDto = userService.updateById(sessionUserDto.getId(), updateDto);
 
         // 세션 동기화 : 수정된 정보를 세션에 반영
-        user.setPassword(null);  // 보안
-        session.setAttribute(Define.SESSION_USER, user);
+        session.setAttribute(Define.SESSION_USER, updateUserDto);
 
         // 성공 후 메인페이지로 리다이렉트
         return "redirect:/";

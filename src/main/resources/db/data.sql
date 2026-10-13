@@ -5,7 +5,7 @@ INSERT INTO user_tb (username, password, email, created_at) VALUES ('minsu',   '
 INSERT INTO user_tb (username, password, email, created_at) VALUES ('jihun',   '1234', 'jihun@tenco.com',   NOW());
 INSERT INTO user_tb (username, password, email, created_at) VALUES ('seoyeon', '1234', 'seoyeon@tenco.com', NOW());
 
-UPDATE user_tb SET banned = TRUE WHERE id = 2;
+-- UPDATE user_tb SET banned = TRUE WHERE id = 2;
 
 -- 2. 게시글 (user_id 는 위 사용자의 id)
 -- admin(1)
