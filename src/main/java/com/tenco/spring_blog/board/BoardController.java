@@ -1,6 +1,9 @@
 package com.tenco.spring_blog.board;
 
 import com.tenco.spring_blog._core.util.Define;
+import com.tenco.spring_blog.reply.Reply;
+import com.tenco.spring_blog.reply.ReplyResponse;
+import com.tenco.spring_blog.reply.ReplyService;
 import com.tenco.spring_blog.user.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final ReplyService replyService;
 
     // GET http://localhost:8080/
     // GET http://localhost:8080/board/list
@@ -42,10 +46,16 @@ public class BoardController {
 
         model.addAttribute("board", detailDto);
 
+        Long sessionUserId = (sessionUserDto == null) ? null : sessionUserDto.getId();
+
         // 수정 및 삭제 버튼 표시 비표시 용 플래그
         // 로그인했으며, 작성자 본인일 때만 수정 삭제 버튼 표시
-        boolean isOwner = sessionUserDto != null && detailDto.getUserId().equals(sessionUserDto.getId());
+        boolean isOwner = sessionUserDto != null && detailDto.getUserId().equals(sessionUserId);
         model.addAttribute("isOwner", isOwner);
+
+        // 댓글 목록 조회
+        List<ReplyResponse.ListDto> replyList = replyService.findAllByBoardId(id, sessionUserId);
+        model.addAttribute("replyList", replyList);
 
         return "board/detail";
     }

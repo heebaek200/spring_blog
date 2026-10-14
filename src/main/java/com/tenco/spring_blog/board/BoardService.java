@@ -2,6 +2,7 @@ package com.tenco.spring_blog.board;
 
 import com.tenco.spring_blog._core.error.Exception403;
 import com.tenco.spring_blog._core.error.Exception404;
+import com.tenco.spring_blog.reply.ReplyJpaRepository;
 import com.tenco.spring_blog.user.SessionUserDto;
 import com.tenco.spring_blog.user.User;
 import com.tenco.spring_blog.user.UserJpaRepository;
@@ -23,6 +24,7 @@ public class BoardService {
 
     private final BoardJpaRepository boardJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private final ReplyJpaRepository replyJpaRepository;
 
 
     /**
@@ -128,6 +130,10 @@ public class BoardService {
             throw new Exception403("본인이 작성한 게시글만 삭제할 수 있습니다.");
         }
 
+        // 게시글의 댓글 일괄 삭제
+        replyJpaRepository.deleteByBoardId(id);
+
+        // 게시글 삭제
         boardJpaRepository.deleteById(id);
 
         log.info("게시글 삭제 완료");
