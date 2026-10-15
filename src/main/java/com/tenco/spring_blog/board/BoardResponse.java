@@ -1,7 +1,12 @@
 package com.tenco.spring_blog.board;
 
 import com.tenco.spring_blog._core.util.MyDateUtil;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.data.domain.Page;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 게시글 응답 DTO
@@ -36,6 +41,53 @@ public class BoardResponse {
                 this.createdAt = MyDateUtil.timestampFormat(board.getCreatedAt());
             }
         }
+    }
+
+    // 게시글 목록 페이지 정보 응답 DTO
+    @Data
+    public static class PageDto {
+        private List<ListDto> content;      // 현재 페이지의 게시글 목록
+        private int size;                   // 페이지 크기
+        private int currentPage;            // 현재 페이지 (1-base 보정)
+        private int totalPages;             // 전체 페이지 수
+        private long totalElements;         // 전체 게시글 수
+        private boolean hasPrevious;        // 이전 페이지 여부
+        private int previousPage;
+        private boolean hasNext;            // 다음 페이지 여부
+        private int nextPage;
+        private List<PageLink> pageLinks;  // 화면에 표시할 페이지 번호 목록
+
+        public PageDto(Page<Board> page) {
+            this.content = page.getContent().stream().map(ListDto::new).toList();
+            this.size = page.getSize();
+            this.currentPage = page.getNumber() + 1;    // 0-base to 1-base
+            this.totalPages = page.getTotalPages();
+            this.totalElements = page.getTotalElements();
+            this.hasPrevious = page.hasPrevious();
+            this.previousPage = currentPage - 1;
+            this.hasNext = page.hasNext();
+            this.nextPage = currentPage + 1;
+            this.pageLinks = makePageLinks(currentPage, totalPages);
+        }
+
+        private List<PageLink> makePageLinks(int currentPage, int totalPages) {
+            List<PageLink> links = new ArrayList<>();
+            int startPage = Math.max(1, currentPage - 2);           // 1보다 작아지지 않게
+            int endPage = Math.min(totalPages, currentPage + 2);    // 전체 페이지 넘지 않게
+
+            for (int i = startPage ; i <= endPage ; i++) {
+                links.add(new PageLink(i, i == currentPage));
+            }
+            return links;
+        }
+    }
+
+    // 페이지 번호 버튼 하나의 정보
+    @Data
+    @AllArgsConstructor
+    public static class PageLink {
+        private int number;                 // 표시할 페이지 번호
+        private boolean active;             // 현재 페이지 여부 (강조 표시용)
     }
 
     // 게시글 목록 응답 DTO

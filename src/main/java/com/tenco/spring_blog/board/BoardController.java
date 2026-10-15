@@ -1,7 +1,6 @@
 package com.tenco.spring_blog.board;
 
 import com.tenco.spring_blog._core.util.Define;
-import com.tenco.spring_blog.reply.Reply;
 import com.tenco.spring_blog.reply.ReplyResponse;
 import com.tenco.spring_blog.reply.ReplyService;
 import com.tenco.spring_blog.user.SessionUserDto;
@@ -13,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -27,9 +27,13 @@ public class BoardController {
     // GET http://localhost:8080/
     // GET http://localhost:8080/board/list
     @GetMapping({"/", "/board/list"})
-    public String list(Model model) {
-        List<BoardResponse.ListDto> boardList = boardService.findAll();
-        model.addAttribute("boardList", boardList);
+    public String list(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "3") int size,
+            Model model
+    ) {
+        BoardResponse.PageDto pageDto = boardService.findAll(page, size);
+        model.addAttribute("boardPage", pageDto);
 
         return "board/list";
     }

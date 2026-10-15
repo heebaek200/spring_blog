@@ -8,10 +8,12 @@ import com.tenco.spring_blog.user.User;
 import com.tenco.spring_blog.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Board 관련 비즈니스 로직을 처리하는 Service 계층
@@ -31,7 +33,6 @@ public class BoardService {
      * 게시글 저장
      * @param saveDto 게시글 저장 정보
      * @param sessionUser 작성자 정보
-     * @return 저장된 게시글
      */
     @Transactional
     public void save(BoardRequest.SaveDto saveDto, SessionUserDto sessionUser) {
@@ -58,18 +59,27 @@ public class BoardService {
     }
 
     /**
-     * 게시글 목록 조회 (메인 페이지 용)
+     * 게시글 목록 조회 (메인 페이지 용) : 페이징 처리 추가
      * @return 게시글 목록 (작성자 정보 포함)
      */
-    public List<BoardResponse.ListDto> findAll() {
+    public BoardResponse.PageDto findAll(int page, int size) {
         log.info("게시글 목록 조회 시작");
-        List<Board> boardList = boardJpaRepository.findAllJoinUser();
 
-        // List<Board>에서 List<BoardResponse.ListDto>로 옮겨담기
-        // 반복문 사용 => 스트림API에 람다식 => 메서드 참조 문법
-        return boardList.stream()
-                .map(BoardResponse.ListDto::new)
-                .toList();
+        // 1. 1부터 시작하는 번호를 0부터로 변환
+        int pageIndex = Math.max(0, page - 1);
+
+        // 2. 페이지 크기는 1 ~ 50으로 제한 (size=10000 같은 요청 방어)
+        int validSize = Math.clamp(size, 1, 50);
+
+        // 페이징 주문서 생성. 최신 글이 먼저 오도록 id 내림차순 정렬.
+        Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
+
+        // 페이징 처리가 된 게시글 목록 조회 요청 (주문 결과 Page)
+        Page<Board> boardPage = boardJpaRepository.findAllJoinUser(pageable);
+
+        // 조회 후 트랜잭션 안에서 응답 DTO로 변환처리
+        BoardResponse.PageDto pageDto = new BoardResponse.PageDto(boardPage);
+        return pageDto;
     }
 
     /**
