@@ -1,6 +1,19 @@
 {{> layout/header}}
 
 <div class="container p-5">
+
+    {{! 검색 폼: GET 방식이라 주소가 /?keyword=...&page=1&size=3 }}
+    <form action="/" method="GET" class="d-flex gap-1 mb-3">
+        <input type="text" name="keyword" value="{{keyword}}"
+               class="form-control me-2" placeholder="제목 또는 내용으로 검색">
+        <button type="submit" class="btn btn-primary text-nowrap">검색</button>
+        <a href="/" class="btn btn-secondary text-nowrap">초기화</a>
+    </form>
+
+    {{#isSearch}}
+    <p><b>{{keyword}}</b> 검색 결과 : {{boardPage.totalElements}}건</p>
+    {{/isSearch}}
+
     {{#boardPage.content}}
         <div class="card mb-3">
             <div class="card-body">
@@ -21,7 +34,7 @@
     <ul class="pagination d-flex justify-content-center">
         {{#boardPage.hasPrevious}}{{! 이전 }}
             <li class="page-item">
-                <a class="page-link" href="/?page={{boardPage.previousPage}}&size={{boardPage.size}}">Previous</a>
+                <a class="page-link" href="/?page={{boardPage.previousPage}}&size={{boardPage.size}}&keyword={{keywordParam}}">Previous</a>
             </li>
         {{/boardPage.hasPrevious}}
         {{^boardPage.hasPrevious}}
@@ -31,14 +44,14 @@
         {{! 페이지 번호 }}
         {{#boardPage.pageLinks}}
             <li class="page-item {{#active}}active{{/active}}">
-                <a class="page-link" href="/?page={{number}}&size={{boardPage.size}}" >{{number}}</a>
+                <a class="page-link" href="/?page={{number}}&size={{boardPage.size}}&keyword={{keywordParam}}">{{number}}</a>
             </li>
         {{/boardPage.pageLinks}}
 
 
         {{#boardPage.hasNext}}{{! 다음 }}
             <li class="page-item">
-                <a class="page-link" href="/?page={{boardPage.NextPage}}&size={{boardPage.size}}">Next</a>
+                <a class="page-link" href="/?page={{boardPage.NextPage}}&size={{boardPage.size}}&keyword={{keywordParam}}">Next</a>
             </li>
         {{/boardPage.hasNext}}
         {{^boardPage.hasNext}}

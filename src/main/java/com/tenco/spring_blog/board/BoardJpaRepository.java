@@ -41,4 +41,24 @@ public interface BoardJpaRepository extends JpaRepository<Board, Long> {
     @Query(value = "SELECT b FROM Board AS b JOIN FETCH b.user",
             countQuery = "SELECT COUNT(b) FROM Board b")
     Page<Board> findAllJoinUser(Pageable pageable);
+
+    // 목록: 페이징 처리 + 검색 기능 이후버전
+    @Query(value = """
+        SELECT b
+        FROM Board AS b
+        JOIN FETCH
+            b.user
+        WHERE
+            b.title   LIKE CONCAT('%', :keyword, '%')
+         OR b.content LIKE CONCAT('%', :keyword, '%')
+""",
+            countQuery = """
+        SELECT COUNT(b)
+        FROM Board AS b
+        WHERE
+            b.title   LIKE CONCAT('%', :keyword, '%')
+         OR b.content LIKE CONCAT('%', :keyword, '%')
+""")
+    Page<Board> findAllKeywordJoinUser(Pageable pageable, @Param("keyword") String keyword);
+
 }

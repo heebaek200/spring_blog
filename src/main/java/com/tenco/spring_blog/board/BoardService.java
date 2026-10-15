@@ -59,10 +59,10 @@ public class BoardService {
     }
 
     /**
-     * 게시글 목록 조회 (메인 페이지 용) : 페이징 처리 추가
+     * 게시글 목록 조회 (메인 페이지 용) : 페이징 처리 추가 : 검색 기능 추가
      * @return 게시글 목록 (작성자 정보 포함)
      */
-    public BoardResponse.PageDto findAll(int page, int size) {
+    public BoardResponse.PageDto findAll(int page, int size, String keyword) {
         log.info("게시글 목록 조회 시작");
 
         // 1. 1부터 시작하는 번호를 0부터로 변환
@@ -75,11 +75,17 @@ public class BoardService {
         Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
 
         // 페이징 처리가 된 게시글 목록 조회 요청 (주문 결과 Page)
-        Page<Board> boardPage = boardJpaRepository.findAllJoinUser(pageable);
+        Page<Board> boardPage;
+
+        // 검색어 유무에 따라 분기
+        if (keyword == null || keyword.isBlank()) {
+            boardPage = boardJpaRepository.findAllJoinUser(pageable);
+        } else {
+            boardPage = boardJpaRepository.findAllKeywordJoinUser(pageable, keyword);
+        }
 
         // 조회 후 트랜잭션 안에서 응답 DTO로 변환처리
-        BoardResponse.PageDto pageDto = new BoardResponse.PageDto(boardPage);
-        return pageDto;
+        return new BoardResponse.PageDto(boardPage);
     }
 
     /**
@@ -106,7 +112,6 @@ public class BoardService {
      * @param id
      * @param updateDto
      * @param sessionUser
-     * @return
      */
     @Transactional
     public void updateById(Long id,  BoardRequest.UpdateDto updateDto, SessionUserDto sessionUser) {
