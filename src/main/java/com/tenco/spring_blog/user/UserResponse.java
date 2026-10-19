@@ -1,8 +1,27 @@
 package com.tenco.spring_blog.user;
 
+import com.tenco.spring_blog._core.util.MyDateUtil;
 import lombok.Data;
 
 public class UserResponse {
+
+    // 마이페이지 응답 DTO
+    @Data
+    public static class DetailDto {
+        private Long id;
+        private String username;
+        private String email;
+        private String profileImage;    // 파일 이름 (없으면 null)
+        private String createdAt;       // 포맷된 가입일
+
+        public DetailDto(User user) {
+            this.id = user.getId();
+            this.username = user.getUsername();
+            this.email = user.getEmail();
+            this.profileImage = user.getProfileImage();
+            this.createdAt = MyDateUtil.timestampFormat(user.getCreatedAt());
+        }
+    }
 
     @Data
     public static class JoinDto {
@@ -23,11 +42,13 @@ public class UserResponse {
         private Long id;
         private String username;
         private String email;
+        private String profileImage;
 
         public UpdateFormDto(User user) {
             this.id = user.getId();
             this.username = user.getUsername();
             this.email = user.getEmail();
+            this.profileImage = user.getProfileImage();
         }
     }
 

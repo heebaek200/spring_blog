@@ -12,9 +12,30 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequiredArgsConstructor
 @Slf4j
 @Controller
-public class userContoller {
+public class UserController {
 
     private final UserService userService;
+
+    // 프로필 사진 삭제
+    @PostMapping("/user/profile-image/delete")
+    public String deleteProfileImage(HttpSession session) {
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+        userService.deleteProfileImage(sessionUserDto.getId());
+
+        return "redirect:/user/detail";
+    }
+
+    // GET http://localhost:8080/user/detail
+    @GetMapping("/user/detail")
+    public String detail(Model model, HttpSession session) {
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+
+        // 조회
+        UserResponse.DetailDto detailDto = userService.findDetail(sessionUserDto.getId());
+        model.addAttribute("user", detailDto);
+
+        return "user/detail";
+    }
 
     // GET http://localhost:8080/join
     @GetMapping("/join")
@@ -25,7 +46,7 @@ public class userContoller {
 
     // POST http://localhost:8080/join
     @PostMapping("/join")
-    public String join(UserRequest.JoinDto joinDto, Model model) {
+    public String join(UserRequest.JoinDto joinDto) {
         // 유효성 검사
         joinDto.validate();
 
@@ -86,7 +107,7 @@ public class userContoller {
         session.setAttribute(Define.SESSION_USER, updateUserDto);
 
         // 성공 후 메인페이지로 리다이렉트
-        return "redirect:/";
+        return "redirect:/user/detail";
     }
 
     // GET http://localhost:8080/logout

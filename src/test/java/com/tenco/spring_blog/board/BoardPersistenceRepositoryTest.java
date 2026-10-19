@@ -17,7 +17,7 @@ public class BoardPersistenceRepositoryTest {
     public void save_연관관계_포함_게시글_저장_테스트() {
         // given
         // 1. User 객체 생성 (실제로는 세션에서 가져온다.)
-        User user = new User(1L, "tester", "1234", "a@naver.com", null, false);
+        User user = new User("tester", "1234", "a@naver.com", null);
         Board board = Board.builder()
                 .title("테스트 글")
                 .content("테스트 내용")
@@ -51,12 +51,10 @@ public class BoardPersistenceRepositoryTest {
         // given
         // 1. 게시글 저장을 위한 User 객체 생성
         User user = new User(
-                1L,
                 "testuser",
                 "1234",
                 "a@naver.com",
-                null,
-                false
+                null
         );
 
         // 2. 삭제할 게시글 객체 생성
