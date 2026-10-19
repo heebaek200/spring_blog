@@ -24,6 +24,11 @@
                     <li class="nav-item"><a class="nav-link" href="/user/detail">마이페이지</a></li>
                     {{! 마이페이지에서 이동하는 페이지로 수정 : <li class="nav-item"><a class="nav-link" href="/user/update">회원정보</a></li>}}
                     <li class="nav-item"><a class="nav-link" href="/logout">로그아웃</a></li>
+
+                    {{#isAdmin}}
+                        {{! 관리자에게만 보이는 메뉴 }}
+                        <li class="nav-item"><a class="nav-link" href="/admin/dashboard">관리자</a></li>
+                    {{/isAdmin}}
                 {{/sessionUserDto}}
 
                 {{^sessionUserDto}}
@@ -32,7 +37,16 @@
                     <li class="nav-item"><a class="nav-link" href="/join">회원가입</a></li>
                     <li class="nav-item"><a class="nav-link" href="/login">로그인</a></li>
                 {{/sessionUserDto}}
+            </ul>
 
+            {{! 오른쪽 : 역할 배지와 사용자명 표시 }}
+            <ul class="navbar-nav ms-auto">
+                {{#sessionUserDto}}
+                <li class="nav-item d-flex align-items-center">
+                    <span class="badge bg-secondary me-2">{{roleDisplay}}</span>
+                    <span class="text-light">{{username}} 님</span>
+                </li>
+                {{/sessionUserDto}}
             </ul>
         </div>
     </div>

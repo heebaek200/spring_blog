@@ -5,7 +5,14 @@ INSERT INTO user_tb (username, password, email, created_at) VALUES ('minsu',   '
 INSERT INTO user_tb (username, password, email, created_at) VALUES ('jihun',   '1234', 'jihun@tenco.com',   NOW());
 INSERT INTO user_tb (username, password, email, created_at) VALUES ('seoyeon', '1234', 'seoyeon@tenco.com', NOW());
 
--- UPDATE user_tb SET banned = TRUE WHERE id = 2;
+-- UPDATE user_tb SET banned = TRUE WHERE id = 2
+
+-- 1-1. 사용자 역할 (admin 은 관리자이면서 일반 사용자)
+INSERT INTO user_role_tb (user_id, role) VALUES (1, 'ADMIN');
+INSERT INTO user_role_tb (user_id, role) VALUES (1, 'USER');
+INSERT INTO user_role_tb (user_id, role) VALUES (2, 'USER');
+INSERT INTO user_role_tb (user_id, role) VALUES (3, 'USER');
+INSERT INTO user_role_tb (user_id, role) VALUES (4, 'USER');
 
 -- 2. 게시글 (user_id 는 위 사용자의 id)
 -- admin(1)

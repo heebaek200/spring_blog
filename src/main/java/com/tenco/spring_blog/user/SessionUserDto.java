@@ -15,10 +15,16 @@ public class SessionUserDto {
     private String username;
     private String email;
 
+    private boolean admin;          // 관리자 여부. 롬복 기준으로 getter는 isAdmin.
+    private String roleDisplay;     // 화면 표시용 (ADMIN 또는 USER)
+
     public SessionUserDto(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.email = user.getEmail();
+
+        this.admin = user.isAdmin();
+        this.roleDisplay = this.admin ? "ADMIN" : "USER";
     }
 
 }

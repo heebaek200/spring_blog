@@ -41,7 +41,10 @@ public class UserService {
         // 프로필 이미지 저장 후 새로운 파일명 획득
         String profileImage = FileUtil.saveImage(joinDto.getProfileImage());
 
-        User savedUser = userJpaRepository.save(joinDto.toEntity(profileImage));
+        // Role  기본값 할당
+        User user = joinDto.toEntity(profileImage);
+        user.addRole(Role.USER);
+        User savedUser = userJpaRepository.save(user);
 
         log.info("회원가입 서비스 처리 완료 - 사용자명: {}, ID: {}",
                 joinDto.getUsername(), savedUser.getId());
