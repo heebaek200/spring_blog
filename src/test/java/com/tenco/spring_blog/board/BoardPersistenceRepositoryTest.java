@@ -1,11 +1,11 @@
 package com.tenco.spring_blog.board;
 
+import com.tenco.spring_blog.user.OAuthProvider;
 import com.tenco.spring_blog.user.User;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 public class BoardPersistenceRepositoryTest {
@@ -17,7 +17,7 @@ public class BoardPersistenceRepositoryTest {
     public void save_연관관계_포함_게시글_저장_테스트() {
         // given
         // 1. User 객체 생성 (실제로는 세션에서 가져온다.)
-        User user = new User("tester", "1234", "a@naver.com", null);
+        User user = new User("tester", "1234", "a@naver.com", null, OAuthProvider.LOCAL);
         Board board = Board.builder()
                 .title("테스트 글")
                 .content("테스트 내용")
@@ -54,7 +54,8 @@ public class BoardPersistenceRepositoryTest {
                 "testuser",
                 "1234",
                 "a@naver.com",
-                null
+                null,
+                OAuthProvider.LOCAL
         );
 
         // 2. 삭제할 게시글 객체 생성
