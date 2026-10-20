@@ -7,7 +7,7 @@
             <div class="text-center mb-4">
                 {{! 프로필 이미지 있을 경우 }}
                 {{#user.profileImage}}
-                    <img src="/images/{{user.profileImage}}" alt="" class="rounded-circle border"
+                    <img src="{{user.profileImage}}" alt="" class="rounded-circle border"
                          style="width: 200px; height: 200px; object-fit: cover;">
                 {{/user.profileImage}}
 
@@ -26,11 +26,11 @@
             </div>
             <div class="mb-3">
                 <label for="" class="form-label fw-bold">이메일</label>
-                <p class="form-control-plaintext">aaaa@bbbb.ccc</p>
+                <p class="form-control-plaintext">{{user.email}}</p>
             </div>
             <div class="mb-3">
                 <label for="" class="form-label fw-bold">가입일</label>
-                <p class="form-control-plaintext">2026.10.19.</p>
+                <p class="form-control-plaintext">{{user.createdAt}}</p>
             </div>
             <div class="mb-3">
                 <a href="/user/update" class="btn btn-primary">회원 정보 수정</a>

@@ -39,16 +39,23 @@ public class User {
     @JoinColumn(name = "user_id", nullable = false)
     private List<UserRole> roles = new ArrayList<>();
 
+    // 가입 경로 (DB에는 LOCAL, KAKAO 문자열로 저장)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @ColumnDefault("'LOCAL'")   // 문자열이므로 안에 작은 따옴표 필수
+    private OAuthProvider provider;
+
     // 블랙리스트
     @ColumnDefault("false")
     private Boolean banned = false;
 
     @Builder
-    public User(String username, String password, String email, String profileImage) {
+    public User(String username, String password, String email, String profileImage, OAuthProvider provider) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.profileImage = profileImage;
+        this.provider = (provider == null) ? OAuthProvider.LOCAL : provider;
     }
 
     public void update(UserRequest.UpdateDto updateDto) {
@@ -87,6 +94,18 @@ public class User {
     // 로그인한 사용자의 관리자 여부 확인 메서드
     public boolean isAdmin() {
         return hasRole(Role.ADMIN);
+    }
+
+    public String getProfilePath() {
+        if (this.profileImage == null) {
+            return null;
+        }
+
+        if (this.profileImage.startsWith("http")) {
+            return this.profileImage;
+        } else {
+            return "/images/%s".formatted(this.profileImage);
+        }
     }
 
 }
