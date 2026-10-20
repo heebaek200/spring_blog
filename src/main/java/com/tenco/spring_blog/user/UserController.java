@@ -34,12 +34,6 @@ public class UserController {
     @Value("${oauth.kakao.client-secret}")
     private String clientSecret;
 
-    @PostConstruct
-    public void init() {
-        log.info("카카오 REST API 키 확인 : {}", kakaoClientId);
-        log.info("카카오 redirectUri 확인 : {}", redirectUri);
-    }
-
     // 카카오 로그인 화면으로 리다이렉트
     @GetMapping("/kakao-login")
     public String kakaoLogin() {

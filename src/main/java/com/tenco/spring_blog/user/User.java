@@ -96,4 +96,16 @@ public class User {
         return hasRole(Role.ADMIN);
     }
 
+    public String getProfilePath() {
+        if (this.profileImage == null) {
+            return null;
+        }
+
+        if (this.profileImage.startsWith("http")) {
+            return this.profileImage;
+        } else {
+            return "/images/%s".formatted(this.profileImage);
+        }
+    }
+
 }
