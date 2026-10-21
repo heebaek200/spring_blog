@@ -50,6 +50,7 @@ public class OAuthController {
     public String socialCallback(
             @PathVariable(name = "social") String social,
             @RequestParam(name = "code", required = false) String code,
+            @RequestParam(name = "state", required = false) String returnedState,
             HttpSession session
     ) {
         OAuthProvider provider;
@@ -60,13 +61,17 @@ public class OAuthController {
             throw new Exception404("지원하지 않는 형태의 소셜 로그인입니다.");
         }
 
-        String state = (String) session.getAttribute(Define.SESSION_OAUTH_STATE);
-        if (state == null) {
-            throw new Exception401("소셜 로그인 중 오류가 발생했습니다.");
+        // 세션에 저장했던 state 조회 후 제거 (일회성 사용)
+        String savedState = (String) session.getAttribute(Define.SESSION_OAUTH_STATE);
+        session.removeAttribute(Define.SESSION_OAUTH_STATE);
+
+        // CSRF 방지: 요청 시 생성한 state와 반환된 state 비교
+        if (savedState == null || !savedState.equals(returnedState)) {
+            throw new Exception401("유효하지 않은 소셜 로그인 요청입니다.");
         }
 
         // 소셜 로그인
-        SessionUserDto sessionUserDto = oAuthLoginService.login(provider, code, state);
+        SessionUserDto sessionUserDto = oAuthLoginService.login(provider, code, returnedState);
 
         // 세션 저장
         session.setAttribute(Define.SESSION_USER, sessionUserDto);

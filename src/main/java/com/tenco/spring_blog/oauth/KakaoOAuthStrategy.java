@@ -42,8 +42,8 @@ public class KakaoOAuthStrategy implements OAuthLoginStrategy {
     @Override
     public String getAuthorizeUrl(String state) {
         return AUTHORIZE_URL
-                + "?client_id=%s&redirect_uri=%s&response_type=code"
-                .formatted(kakaoClientId, redirectUri);
+                + "?client_id=%s&redirect_uri=%s&response_type=code&state=%s"
+                .formatted(kakaoClientId, redirectUri, state);
     }
 
     @Override
