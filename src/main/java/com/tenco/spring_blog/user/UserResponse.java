@@ -60,7 +60,7 @@ public class UserResponse {
     // 카카오 액세스 토큰 응답 DTO
     @Getter
     @Setter
-    public static class OauthToken {
+    public static class OAuthToken {
 
         @JsonProperty("access_token")
         private String accessToken;
