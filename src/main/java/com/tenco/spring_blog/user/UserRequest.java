@@ -2,7 +2,6 @@ package com.tenco.spring_blog.user;
 
 import com.tenco.spring_blog._core.error.Exception400;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 public class UserRequest {
@@ -63,12 +62,12 @@ public class UserRequest {
 
         // DTO에서 User 엔티티로 변환하는 메서드
         // 계층간 데이터 변환을 명확하게 분리하는 것이 좋다.
-        public User toEntity(String profileImageFilename) {
+        public User toEntity(String profileImageFilename, String encodedPassword) {
 //            validate();
 
             return User.builder()
                     .username(username)
-                    .password(password)
+                    .password(encodedPassword)
                     .email(email)
                     .profileImage(profileImageFilename)
                     .build();

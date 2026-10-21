@@ -25,7 +25,7 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
      *      - 해당 ID를 가진 데이터가 있는지 확인하여 boolean을 반환함
      */
 
-    // 사용자명과 비밀번호로 조회 (로그인용)
+    // 해시 matches 로그인 용
     @Query("""
 SELECT
     DISTINCT u
@@ -33,12 +33,8 @@ FROM User AS u
 LEFT JOIN FETCH u.roles
 WHERE
     u.username = :username
-AND u.password = :password
 """)
-    Optional<User> findByUsernameAndPassword(
-            @Param("username") String username,
-            @Param("password") String password
-    );
+    Optional<User> findByUsernameWithRoles(@Param("username") String username);
 
     // 사용자명으로 사용자 조회 (중복 체크용)
     @Query("SELECT u FROM User AS u WHERE u.username = :username")
