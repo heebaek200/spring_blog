@@ -1,4 +1,4 @@
-package com.tenco.spring_blog.user;
+package com.tenco.spring_blog.oauth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,16 +11,16 @@ import org.springframework.web.client.RestTemplate;
 // 카카오 서버와 Http 통신만 담당하는 클래스
 @Slf4j
 @Component // bean 관리 (IoC 싱글톤)
-public class KakaoApiClient {
+public class KakaoOAuthStrategy implements OAuthLoginStrategy {
 
     @Value("${oauth.kakao.client-id}")
     private String kakaoClientId;
 
-    @Value("${oauth.kakao.redirect-uri}")
-    private String redirectUri;
-
     @Value("${oauth.kakao.client-secret}")
     private String clientSecret;
+
+    @Value("${oauth.kakao.redirect-uri}")
+    private String redirectUri;
 
     // 인가 요청 주소
     private static String AUTHORIZE_URL = "https://kauth.kakao.com/oauth/authorize";
@@ -34,15 +34,29 @@ public class KakaoApiClient {
     // 한 번 만들면 여러 요청에서 함께 써도 안전하게 되어 있는 클래스
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // 1. 카카오 로그인 화면 주소 만들기 (로그인 + 동의 화면)
-    public String getAuthorizeUrl() {
+    @Override
+    public OAuthProvider provider() {
+        return OAuthProvider.KAKAO;
+    }
+
+    @Override
+    public String getAuthorizeUrl(String state) {
         return AUTHORIZE_URL
                 + "?client_id=%s&redirect_uri=%s&response_type=code"
                 .formatted(kakaoClientId, redirectUri);
     }
 
-    // 2. 인가 코드로 액세스 토큰 요청 (POST, 폼 데이터)
-    public UserResponse.OAuthToken requestAccessToken(String code) {
+    @Override
+    public OAuthResponse.UserProfile getUserProfile(String code, String state) {
+        // 1. 인가 코드로 액세스 토큰 발급 (카카오 서버 통신)
+        OAuthResponse.OAuthToken oAuthToken = requestAccessToken(code);
+
+        // 2. 액세스 토큰으로 사용자 정보 조회 (카카오 서버)
+        return requestProfile(oAuthToken.getAccessToken());
+    }
+
+    // 인가 코드로 액세스 토큰 요청 (POST, 폼 데이터)
+    private OAuthResponse.OAuthToken requestAccessToken(String code) {
         // 받은 인가 코드를 활용하여 토큰 요청 (POST)
         HttpHeaders headers = new HttpHeaders();
         // Content-Type: application/x-www-form-urlencoded;charset=utf-8
@@ -58,31 +72,30 @@ public class KakaoApiClient {
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity(params, headers);
 
-        ResponseEntity<UserResponse.OAuthToken> response = restTemplate.exchange(
-                "https://kauth.kakao.com/oauth/token",
+        ResponseEntity<OAuthResponse.OAuthToken> response = restTemplate.exchange(
+                TOKEN_URL,
                 HttpMethod.POST,
                 tokenRequest,
-                UserResponse.OAuthToken.class
+                OAuthResponse.OAuthToken.class
         );
         log.info("카카오 액세스 토큰 발급 완료"); // 토큰 값은 로그에 남기지 않음
         return response.getBody();
     }
 
-    // 3. 액세스 토큰으로 사용자 정보 요청 (GET, 인증 헤더)
-    public UserResponse.KakaoUserInfo requestProfile(String accessToken) {
+    // 액세스 토큰으로 사용자 정보 요청 (GET, 인증 헤더)
+    private OAuthResponse.UserProfile requestProfile(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
 
         HttpEntity request = new HttpEntity(headers);
 
-        ResponseEntity<UserResponse.KakaoUserInfo> response = restTemplate.exchange(
+        ResponseEntity<OAuthResponse.KakaoUserProfile> response = restTemplate.exchange(
                 PROFILE_URL,
                 HttpMethod.GET,
                 request,
-                UserResponse.KakaoUserInfo.class
+                OAuthResponse.KakaoUserProfile.class
         );
 
-        return response.getBody();
+        return response.getBody().toUserProfile();
     }
-
 }

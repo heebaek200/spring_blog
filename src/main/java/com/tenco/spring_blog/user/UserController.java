@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -16,31 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class UserController {
 
     private final UserService userService;
-    private final KakaoLoginService kakaoLoginService;
-
-    // 카카오 로그인 화면으로 리다이렉트
-    @GetMapping("/kakao-login")
-    public String kakaoLogin() {
-        return "redirect:%s".formatted(
-                kakaoLoginService.getAuthorizeUrl()
-        );
-    }
-
-    // 카카오 로그인 화면 이후 처리
-    @GetMapping("/oauth/kakao")
-    public String kakaoCallback(
-            @RequestParam(name = "code", required = false) String code,
-            HttpSession session
-    ) {
-        // 카카오 로그인
-        SessionUserDto sessionUserDto = kakaoLoginService.login(code);
-
-        // 세션 저장
-        session.setAttribute(Define.SESSION_USER, sessionUserDto);
-
-        // 리다이렉트
-        return "redirect:/";
-    }
 
     // 프로필 사진 삭제
     @PostMapping("/user/profile-image/delete")

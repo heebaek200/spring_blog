@@ -129,7 +129,7 @@ public class GlobalExceptionHandler {
         log.error("==== 500 Internal Server Error 발생 ====");
         log.error("요청 URL : {}", request.getRequestURL());
         log.error("서버 오류 : {}", e.getMessage());
-        log.error("스택 트레이스 : {}", e.toString());
+        log.error("스택 트레이스 : {}", e);
 
         // 헤더의 sessionUserDto
         addSessionUserDto(request, model);
@@ -151,7 +151,7 @@ public class GlobalExceptionHandler {
         log.error("요청 URL : {}", request.getRequestURL());
         log.error("에러 타입 : {}", e.getClass().getSimpleName());
         log.error("에러 메시지 : {}", e.getMessage());
-        log.error("스택 트레이스 : {}", e.toString());
+        log.error("스택 트레이스 : {}", e);
 
         model.addAttribute("msg", "시스템 오류 발생. 관리자에게 문의해주세요.");
 
@@ -171,7 +171,7 @@ public class GlobalExceptionHandler {
         log.error("상세 원인 : {}", e.getMostSpecificCause().getMessage());
         log.error("에러 타입 : {}", e.getClass().getSimpleName());
         log.error("에러 메시지 : {}", e.getMessage());
-        log.error("스택 트레이스 : {}", e.toString());
+        log.error("스택 트레이스 : {}", e);
 
         model.addAttribute("msg", "시스템 오류 발생. 관리자에게 문의해주세요.");
 
