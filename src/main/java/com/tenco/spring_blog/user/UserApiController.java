@@ -1,9 +1,13 @@
 package com.tenco.spring_blog.user;
 
+import com.tenco.spring_blog._core.error.Exception400;
+import com.tenco.spring_blog._core.util.Define;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +39,7 @@ public class UserApiController {
         // SMPT 사용해서 인증번호 발송
         mailService.sendVerificationCode(emailCheckDto.getEmail(), session);
 
-        return ResponseEntity.ok(Map.of("message", "인증되었습니다."));
+        return ResponseEntity.ok(Map.of("message", "인증번호 발송되었습니다.%d분 안에 입력하세요.".formatted(Define.CODE_EXPIRE_MINUTES)));
     }
 
     // POST /api/email/verify
@@ -52,6 +56,23 @@ public class UserApiController {
         }
 
         return ResponseEntity.ok().body(Map.of("message", "인증되었습니다."));
+    }
+
+    // 임시 예외처리 (API 응답용)
+    @ExceptionHandler(Exception400.class)
+    public ResponseEntity<Map<String, String>> handleEx400(Exception400 e) {
+        log.info("{}", e);
+        return ResponseEntity.badRequest().body(Map.of(
+                "message", e.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleEx500(RuntimeException e) {
+        log.info("{}", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "message", e.getMessage()
+        ));
     }
 
 

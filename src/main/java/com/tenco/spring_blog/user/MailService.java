@@ -1,5 +1,6 @@
 package com.tenco.spring_blog.user;
 
+import com.tenco.spring_blog._core.error.Exception400;
 import com.tenco.spring_blog._core.error.Exception500;
 import com.tenco.spring_blog._core.util.Define;
 import com.tenco.spring_blog._core.util.MailUtil;
@@ -13,6 +14,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 
 // 메일 발송, 인증번호 확인
 @Slf4j
@@ -21,6 +23,16 @@ import java.text.MessageFormat;
 public class MailService {
 
     private final JavaMailSender javaMailSender;
+
+    // 인증 코드와 유효시간을 묶은 형태를 세션에 보관해보자 : record 문법
+    private record EmailCode(
+            String code,
+            LocalDateTime expriresAt
+    ) {
+        boolean isExpired() {
+            return LocalDateTime.now().isAfter(expriresAt);
+        }
+    }
 
     // 인증번호 발송
     public void sendVerificationCode(String email, HttpSession session) {
@@ -36,7 +48,8 @@ public class MailService {
                     "UTF-8");
             helper.setTo(email);    // 받는 사람 이메일 주소
             helper.setSubject("[스프링블로그] 회원가입 인증번호");
-            helper.setText("<h3>인증번호는 %s입니다</h3>".formatted(code), true);
+            helper.setText("<h3>인증번호는 %s입니다</h3><p>%d분 안에 입력해주세요.</p>".formatted(code, Define.CODE_EXPIRE_MINUTES),
+                    true);
 
 
             // 1-3 발송 (실패하면...)
@@ -48,20 +61,35 @@ public class MailService {
             throw new Exception500("메일 작성 중 오류가 발생했습니다.");
         }
 
-        session.setAttribute("%s%s".formatted(Define.EMAIL_CODE_PREFIX, email), code);
+        session.setAttribute("%s%s".formatted(Define.EMAIL_CODE_PREFIX, email),
+                new EmailCode(
+                        code,
+                        LocalDateTime.now().plusMinutes(Define.CODE_EXPIRE_MINUTES)
+                ));
         log.info("인증번호 발송 완료 - 이메일 : {}", email);
     }
 
     // 인증번호 확인 : 일치하면 true 반환
     public boolean verifyCode(String email, String code, HttpSession session) {
-        String savedCode = (String) session.getAttribute("%s%s".formatted(Define.EMAIL_CODE_PREFIX, email));
+        String key = "%s%s".formatted(Define.EMAIL_CODE_PREFIX, email);
+        EmailCode savedEmailCode = (EmailCode) session.getAttribute(key);
 
-        if (savedCode == null || ! savedCode.equals(code)) {
-            return false;
+        if (savedEmailCode == null) {
+            throw new Exception400("인증번호를 먼저 입력해주세요");
+        }
+
+        if (savedEmailCode.isExpired()) {
+            // 만료한 인증번호는 삭제
+            session.removeAttribute(key);
+            throw new Exception400("인증번호가 만료되었습니다. 다시 요청해주세요.");
+        }
+
+        if (! savedEmailCode.code().equals(code)) {
+            throw new Exception400("인증번호가 일치하지 않습니다.");
         }
 
         // 사용한 인증번호는 삭제
-        session.removeAttribute("%s%s".formatted(Define.EMAIL_CODE_PREFIX, email));
+        session.removeAttribute(key);
 
         // 인증을 마친 이메일을 세션에 기록 (회원가입 시 서버가 사용)
         session.setAttribute(Define.VERIFIED_EMAIL, email);

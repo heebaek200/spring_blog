@@ -71,7 +71,8 @@
                 })
             });
 
-            // const result = await response.json();
+            const result = await response.json();
+            alert(result.message);
 
             if (response.ok) {
                 document.querySelector("#code-box").style.display = "block";
