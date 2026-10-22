@@ -1,5 +1,6 @@
 package com.tenco.spring_blog.user;
 
+import com.tenco.spring_blog._core.error.Exception400;
 import com.tenco.spring_blog._core.util.Define;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class UserController {
 
     private final UserService userService;
+    private final MailService mailService;
 
     // 프로필 사진 삭제
     @PostMapping("/user/profile-image/delete")
@@ -46,9 +48,14 @@ public class UserController {
 
     // POST http://localhost:8080/join
     @PostMapping("/join")
-    public String join(UserRequest.JoinDto joinDto) {
+    public String join(UserRequest.JoinDto joinDto, HttpSession session) {
         // 유효성 검사
         joinDto.validate();
+
+        // 인증번호와 일치한 메일과 같은 메일인지 확인
+        if (!mailService.verifyMail(joinDto.getEmail(), session)) {
+            throw new Exception400("인증코드를 검사하지 않은 이메일로 회원가입할 수 없습니다.");
+        }
 
         userService.join(joinDto);
 

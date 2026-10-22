@@ -35,10 +35,7 @@ public class UserService {
         });
 
         // 이메일 중복체크
-        userJpaRepository.findByEmail(joinDto.getEmail()).ifPresent(user -> {
-            log.warn("회원가입 실패 - 중복된 이메일");
-            throw new Exception400("이미 사용 중인 이메일입니다.");
-        });
+        checkEmailAvailable(joinDto.getEmail());
 
         // 비밀번호 해싱
         String encodedPassword = passwordEncoder.encode(joinDto.getPassword());
@@ -164,5 +161,12 @@ public class UserService {
         user.updateProfileImage(null);  // DB의 파일 정보 비우기 (null 세팅)
 
         FileUtil.deleteFile(oldImage);  // 실제 파일 삭제
+    }
+
+    // 이메일 사용가능 여부 (인증번호 발송 전)
+    public void checkEmailAvailable(String email) {
+        userJpaRepository.findByEmail(email).ifPresent(user -> {
+            throw new Exception400("이미 등록된 이메일입니다.");
+        });
     }
 }
