@@ -1,6 +1,6 @@
 package com.tenco.spring_blog.board;
 
-import com.tenco.spring_blog.user.OAuthProvider;
+import com.tenco.spring_blog.oauth.OAuthProvider;
 import com.tenco.spring_blog.user.User;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;

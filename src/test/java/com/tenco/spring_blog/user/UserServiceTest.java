@@ -3,6 +3,7 @@ package com.tenco.spring_blog.user;
 import com.tenco.spring_blog._core.error.Exception400;
 import com.tenco.spring_blog._core.error.Exception401;
 import com.tenco.spring_blog._core.error.Exception404;
+import com.tenco.spring_blog.oauth.OAuthProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

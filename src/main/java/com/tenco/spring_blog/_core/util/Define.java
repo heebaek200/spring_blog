@@ -4,4 +4,6 @@ public class Define {
 
     public static final String SESSION_USER = "sessionUserDto";
 
+    public static final String SESSION_OAUTH_STATE = "oauthState";
+
 }

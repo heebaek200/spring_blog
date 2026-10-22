@@ -1,5 +1,6 @@
 package com.tenco.spring_blog.user;
 
+import com.tenco.spring_blog.oauth.OAuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;

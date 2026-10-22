@@ -1,6 +1,7 @@
 package com.tenco.spring_blog.user;
 
 import com.tenco.spring_blog._core.util.Define;
+import com.tenco.spring_blog.oauth.OAuthProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
