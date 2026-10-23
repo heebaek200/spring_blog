@@ -12,7 +12,13 @@ public class Define {
     public static final String EMAIL_CODE_PREFIX = "emailCode_";    // emailCode_a@naver.com
     // 인증을 마친 이메일 주소
     public static final String VERIFIED_EMAIL = "verifiedEmail";
-    // 인증번호 유효 시간 5분 (테스트 1분)
+
+    // 인증번호 유효 시간 5분
     public static final int CODE_EXPIRE_MINUTES = 5;
+
+    // 휴대폰 번호 인증
+    public static final String SMS_CODE_PREFIX = "smsCode_";    // smsCode_01011112222
+    // SMS 인증번호 재발송 제한 시간 (60초)
+    public static final int SMS_RESEND_INTERVAL_SECONDS = 60;
 
 }
