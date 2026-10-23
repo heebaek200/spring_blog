@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // SMS 발송, 인증번호 확인
 @Slf4j
@@ -31,28 +32,53 @@ public class SmsService {
     @Value("${sms.solapi.sender}")
     private String sender;
 
-    // 인증 코드와 유효시간을 묶은 형태를 세션에 보관해보자 : record 문법
+    // 인증 코드와 유효시간, 그리고 입력 횟수 제한
     private record SmsCode(
             String code,
-            LocalDateTime resendAvailableAt,
-            LocalDateTime expiresAt
+            LocalDateTime expiresAt,
+            AtomicInteger requestCount
     ) {
-        boolean isResendAvailable() {
-            return LocalDateTime.now().isAfter(resendAvailableAt);
+        public SmsCode(String code, LocalDateTime expiresAt) {
+            this(code, expiresAt, new AtomicInteger(0));
         }
+
         boolean isExpired() {
             return LocalDateTime.now().isAfter(expiresAt);
         }
     }
 
+    // 재발송 가능 시간
+    public record SmsResendInterval(
+            LocalDateTime resendAvailableAt
+    ) {
+        boolean isResendAvailable() {
+            return LocalDateTime.now().isAfter(resendAvailableAt);
+        }
+    }
+
+    // SMS 발송 제한 검사와 선점을 보호하는 공통 잠금
+    private final Object resendLock = new Object();
+
     // 인증번호 발송
     public void sendVerificationCode(String tel, HttpSession session) {
-        String key = "%s%s".formatted(Define.SMS_CODE_PREFIX, tel);
-        SmsCode savedSmsCode = (SmsCode) session.getAttribute(key);
+        String keySmsCode = "%s%s".formatted(Define.SMS_CODE_PREFIX, tel);
 
-        // 재발송 60초 제한
-        if (savedSmsCode != null && !savedSmsCode.isResendAvailable()) {
-            throw new Exception400("마지막 인증번호 전송으로부터 60초 후에 전송할 수 있습니다.");
+        synchronized (resendLock) { // 동시 요청 취약성 보완 (단일 서버, 같은 세션 한정)
+
+            SmsResendInterval savedSmsResendInterval = (SmsResendInterval) session.getAttribute(Define.SMS_RESEND_INTERVAL);
+
+            // 재발송 60초 제한
+            if (savedSmsResendInterval != null) {
+                if (!savedSmsResendInterval.isResendAvailable()) {
+                    throw new Exception400("마지막 인증번호 전송으로부터 60초 후에 전송할 수 있습니다.");
+                }
+            }
+
+            session.setAttribute(Define.SMS_RESEND_INTERVAL,
+                    new SmsResendInterval(
+                            LocalDateTime.now().plusSeconds(Define.SMS_RESEND_INTERVAL_SECONDS)
+                    ));
+
         }
 
         // 6자리 인증번호 생성
@@ -74,17 +100,17 @@ public class SmsService {
 
         } catch (SolapiMessageNotReceivedException e) {
             log.error("SMS 발송 중 오류가 발생했습니다 : {}", e.getMessage());
-            log.error("{}", e.getFailedMessageList());
+            log.debug("{}", e.getFailedMessageList());
 
             throw new Exception500("SMS 작성 중 오류가 발생했습니다.");
         } catch (Exception exception) {
             throw new Exception500("SMS 작성 중 예상치 못한 오류가 발생했습니다.");
         }
 
-        session.setAttribute(key,
+        // 세션 갱신
+        session.setAttribute(keySmsCode,
                 new SmsCode(
                         code,
-                        LocalDateTime.now().plusSeconds(Define.SMS_RESEND_INTERVAL_SECONDS),
                         LocalDateTime.now().plusMinutes(Define.CODE_EXPIRE_MINUTES)
                 ));
         log.info("인증번호 발송 완료 - 전화번호 : {}", tel);
@@ -97,6 +123,15 @@ public class SmsService {
 
         if (savedSmsCode == null) {
             throw new Exception400("인증번호를 먼저 입력해주세요");
+        }
+
+        // 인증번호 입력 횟수 제한
+        int requestCount = savedSmsCode.requestCount().incrementAndGet();
+        if (requestCount > Define.SMS_INPUT_LIMIT) {
+            // 횟수 넘은 인증번호는 삭제
+            session.removeAttribute(key);
+            throw new Exception400("인증번호 입력 횟수 제한 %d를 초과했습니다. 다시 요청해주세요."
+                    .formatted(Define.SMS_INPUT_LIMIT));
         }
 
         if (savedSmsCode.isExpired()) {

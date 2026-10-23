@@ -18,7 +18,11 @@ public class Define {
 
     // 휴대폰 번호 인증
     public static final String SMS_CODE_PREFIX = "smsCode_";    // smsCode_01011112222
+    // SMS 인증번호 재발송 제한 시간 관리
+    public static final String SMS_RESEND_INTERVAL = "smsResendInterval";
     // SMS 인증번호 재발송 제한 시간 (60초)
     public static final int SMS_RESEND_INTERVAL_SECONDS = 60;
+    // 입력 횟수 제한 (5회)
+    public static final int SMS_INPUT_LIMIT = 5;
 
 }

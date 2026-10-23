@@ -82,7 +82,7 @@ public class SmsApiController {
     public ResponseEntity<Map<String, String>> handleEx500(RuntimeException e) {
         log.info("{}", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "message", e.getMessage()
+                "message", "오류가 발생했습니다. 잠시 후 다시 시도해주세요."
         ));
     }
 
