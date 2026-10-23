@@ -1,0 +1,133 @@
+{{> layout/header}}
+
+<div class="container p-5">
+    <div class="card">
+        <div class="card-header"><b>휴대폰 인증</b></div>
+        <div class="card-body">
+
+            {{! 전화번호 입력 + 인증번호 전송 버튼 }}
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="tel" class="form-control" placeholder="휴대폰 번호" name="tel" id="tel" required>
+                    <button type="button" class="btn btn-outline-secondary" id="send-btn" onclick="sendCode()">인증번호 전송</button>
+                </div>
+            </div>
+
+            {{! 인증번호 입력 (처음엔 숨김, 발송 후 보여주기) }}
+            <div class="mb-3" id="code-box" style="display: none;">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="code" placeholder="인증번호 입력" maxlength="">
+                    <button type="button" class="btn btn-outline-secondary" onclick="verifyCode()">확인</button>
+                </div>
+
+                <div id="msg" class="form-text"></div>
+            </div>
+
+            <div class="mb-3">
+                <a href="/user/detail" class="btn btn-secondary">마이페이지로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // 인증 완료 여부 (화면 안내 용, 실제 검사는 서버의 세션으로 함)
+    let isTelVerified = false;
+
+    // 1. 인증번호 전송
+    async function sendCode() {
+        const telEl = document.querySelector("#tel");
+        const tel = telEl.value.replace(/\D/g, "");   // 사용자 입력 (입력값의 숫자가 아닌 문자를 제거해 형식을 통일)
+        if (!tel) {
+            alert("휴대폰 번호를 입력해주세요");
+            telEl.focus();
+            return;
+        }
+
+        // SMS 발송은 오래 걸리므로, 버튼을 막아 중복 요청 방지
+        const sendBtn = document.querySelector("#send-btn");
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = "전송 중 ...";
+
+        try {
+            const response = await fetch("/api/sms/send", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    tel: tel
+                })
+            });
+
+            const result = await response.json();
+            alert(result.message);
+
+            if (response.ok) {
+                document.querySelector("#code-box").style.display = "block";
+            }
+
+        } catch (e) {
+            console.error(e);
+            alert("서버와 통신하지 못했습니다");
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = "인증번호 전송";
+        }
+    }
+
+    // 2. 인증번호 확인 전송
+    async function verifyCode() {
+        // 사용자 전화번호와 인증코드 6자리
+        const tel = document.querySelector("#tel").value.replace(/\D/g, "");   // 입력값의 숫자가 아닌 문자를 제거해 형식을 통일
+        const code = document.querySelector("#code").value;
+
+        if (!code) {
+            alert("인증번호를 입력해주세요");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/sms/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    tel: tel,
+                    code: code
+                })
+            });
+            const result = await response.json();
+
+            const msgBox = document.querySelector("#msg");
+            if(response.ok) {
+                isTelVerified = true;
+                msgBox.innerHTML = result.message;
+                msgBox.className = "form-text text-success";
+                // 인증한 전호번호를 화면에서 바꾸지 못하게 잠금
+                document.querySelector("#tel").readOnly = true;
+                document.querySelector("#send-btn").disabled = true;
+            } else {
+                msgBox.innerHTML = result.message;
+                msgBox.className = "form-text text-danger";
+            }
+
+        } catch (e) {
+            console.error(e);
+            alert("서버와 통신하지 못했습니다.");
+        }
+    }
+
+    // 회원가입 제출 직전 확인 (false를 반환하면 제출이 취소됨)
+    function checkVerify() {
+        if (!isEmailVerified) {
+            alert("휴대폰 번호 인증을 먼저 완료해주세요");
+            return false;
+        }
+
+        return true;
+    }
+
+</script>
+
+{{> layout/footer}}
