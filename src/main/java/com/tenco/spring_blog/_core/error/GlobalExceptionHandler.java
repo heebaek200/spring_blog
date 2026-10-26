@@ -178,6 +178,26 @@ public class GlobalExceptionHandler {
         return "err/500";
     }
 
+    @ExceptionHandler(NotEnoughPointException.class)
+    @ResponseBody   // alert이 뜨도록 수정
+    public String notEnoughPointEx(
+            NotEnoughPointException e,
+            HttpServletRequest request
+    ) {
+        log.warn("==== NotEnoughPointException 에러 발생 ====");
+        log.warn("요청 URL : {}", request.getRequestURL());
+        log.warn("권한 오류 : {}", e.getMessage());
+        log.warn("예외 클래스 : {}", e.getClass().getSimpleName());
+
+        String msg = e.getMessage().replace("'", "\\'");
+        return """
+                <script>
+                    alert('%s');
+                    history.back();
+                </script>
+                """.formatted(msg);
+    }
+
     // 오류 화면 헤더의 로그인 메뉴가 보이도록 sessionUserDto를 Model에 추가
     private void addSessionUserDto(HttpServletRequest request, Model model) {
         HttpSession session = request.getSession(false);

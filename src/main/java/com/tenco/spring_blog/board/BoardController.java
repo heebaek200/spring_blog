@@ -1,6 +1,7 @@
 package com.tenco.spring_blog.board;
 
 import com.tenco.spring_blog._core.util.Define;
+import com.tenco.spring_blog.purchase.PurchaseService;
 import com.tenco.spring_blog.reply.ReplyResponse;
 import com.tenco.spring_blog.reply.ReplyService;
 import com.tenco.spring_blog.user.SessionUserDto;
@@ -25,6 +26,18 @@ public class BoardController {
 
     private final BoardService boardService;
     private final ReplyService replyService;
+    private final PurchaseService purchaseService;
+
+    // 유료 게시글 구매 요청 URL 만들기
+    // POST /board/{id}/purchase
+    @PostMapping("/board/{id}/purchase")
+    public String purchase(@PathVariable(name = "id") Long id, HttpSession session) {
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+        purchaseService.purchase(id, sessionUserDto.getId());
+
+        // 구매 후 상세보기로 이동처리 (이제 본문이 나와야 함)
+        return "redirect:/board/%d".formatted(id);
+    }
 
     // GET http://localhost:8080/
     // GET http://localhost:8080/board/list
@@ -52,12 +65,11 @@ public class BoardController {
             Model model,
             HttpSession session
     ) {
-        BoardResponse.DetailDto detailDto = boardService.findById(id);
         SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
 
-        model.addAttribute("board", detailDto);
-
         Long sessionUserId = (sessionUserDto == null) ? null : sessionUserDto.getId();
+        BoardResponse.DetailDto detailDto = boardService.findById(id, sessionUserId);
+        model.addAttribute("board", detailDto);
 
         // 수정 및 삭제 버튼 표시 비표시 용 플래그
         // 로그인했으며, 작성자 본인일 때만 수정 삭제 버튼 표시

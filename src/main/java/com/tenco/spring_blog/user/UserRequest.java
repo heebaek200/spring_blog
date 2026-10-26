@@ -6,6 +6,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class UserRequest {
 
+    // 포인트 충전 요청 DTO(테스트용 충전 API, 실제 서비스는 결제 연동으로 대체)
+    @Data
+    public static class PointChargeDto {
+        private Integer amount;     // 충전할 포인트
+
+        public void validate() {
+            if (amount == null || amount <= 0) {
+                throw new Exception400("충전할 포인트는 0보다 커야합니다.");
+            }
+
+            if (amount > 100_000) {
+                throw new Exception400("한 번에 100,000 포인트까지 충전할 수 있습니다.");
+            }
+        }
+    }
+
     // 이메일 인증 요청 DTO
     @Data
     public static class EmailCheckDto {

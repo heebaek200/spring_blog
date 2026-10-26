@@ -58,6 +58,35 @@ public class UserApiController {
         return ResponseEntity.ok().body(Map.of("message", "인증되었습니다."));
     }
 
+    // POST http://localhost:8080/api/point/charge
+    // 요청 바디 : {"amount": 1_000}
+    @PostMapping("/api/point/charge")
+    public ResponseEntity<?> chargePoint(
+            @RequestBody UserRequest.PointChargeDto chargeDto,
+            HttpSession session) {
+
+        // 1. 인증검사
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+        if (sessionUserDto == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of(
+                            "message", "로그인이 필요합니다."
+                    ));
+        }
+
+        // 2. 유효성 검사
+        chargeDto.validate();
+
+        // 3. 서비스에 위임
+        int point = userService.chargePoint(sessionUserDto.getId(), chargeDto.getAmount());
+
+        // 4. 응답처리
+        return ResponseEntity.ok(Map.of(
+                "message", "포인트가 충전되었습니다.",
+                "point", point
+        ));
+    }
+
     // 임시 예외처리 (API 응답용)
     @ExceptionHandler(Exception400.class)
     public ResponseEntity<Map<String, String>> handleEx400(Exception400 e) {

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -17,12 +18,20 @@ import java.sql.Timestamp;
 @Table(name = "board_tb")
 @Entity
 public class Board {
+
+    // 유료 게시글 가격
+    public static final int PREMIUM_PRICE = 500;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
     private String content;
+
+    @Column(nullable = false)
+    @ColumnDefault("false")
+    private boolean premium;
 
 //    private String username;
 
@@ -36,16 +45,12 @@ public class Board {
     // 비즈니스 로직을 위한 생성자 설계
     // id와 createAt은 JPA가 자동으로 설정하므로 매개변수에서 제외
     @Builder
-    public Board(String title, String content, User user) {
+    public Board(String title, String content, User user, boolean premium) {
         this.title = title;
         this.content = content;
         this.user = user;
+        this.premium = premium;
     }
-//    public Board(String title, String content, String username) {
-//        this.title = title;
-//        this.content = content;
-//        this.username = username;
-//    }
 
     // 자신의 상태값을 변경하는 메서드 추가 (영속성 엔티티 수정 메서드)
     public void update(BoardRequest.UpdateDto updateDto) {
@@ -54,6 +59,7 @@ public class Board {
         // 영속 상태에 있는 엔티티의 필드값을 여기서 변경
         this.title = updateDto.getTitle();
         this.content = updateDto.getContent();
+        this.premium = updateDto.isPremium();
     }
 
     public boolean isOwner(Long userId) {

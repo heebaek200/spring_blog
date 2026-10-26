@@ -2,6 +2,7 @@ package com.tenco.spring_blog.board;
 
 import com.tenco.spring_blog._core.error.Exception403;
 import com.tenco.spring_blog._core.error.Exception404;
+import com.tenco.spring_blog.purchase.PurchaseJpaRepository;
 import com.tenco.spring_blog.reply.ReplyJpaRepository;
 import com.tenco.spring_blog.user.SessionUserDto;
 import com.tenco.spring_blog.user.User;
@@ -27,6 +28,7 @@ public class BoardService {
     private final BoardJpaRepository boardJpaRepository;
     private final UserJpaRepository userJpaRepository;
     private final ReplyJpaRepository replyJpaRepository;
+    private final PurchaseJpaRepository purchaseJpaRepository;
 
 
     /**
@@ -49,13 +51,19 @@ public class BoardService {
      * @param id 게시글 PK
      * @return 게시글 정보 (작성자 정보 포함)
      */
-    public BoardResponse.DetailDto findById(Long id) {
+    public BoardResponse.DetailDto findById(Long id, Long sessionUserId) {
         log.info("게시글 상세 조회 시작 - id: {}", id);
 
         Board board = boardJpaRepository.findByIdJoinUser(id)
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
 
-        return new BoardResponse.DetailDto(board);
+        // 로그인하지 않았으면 작성자도 구매자도 아님
+        boolean owner = sessionUserId != null && board.isOwner(sessionUserId);
+
+        // 구매여부
+        boolean purchased = sessionUserId != null && purchaseJpaRepository.existsByUserIdAndBoardId(sessionUserId, id);
+
+        return new BoardResponse.DetailDto(board, owner, purchased);
     }
 
     /**

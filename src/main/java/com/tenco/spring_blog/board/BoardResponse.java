@@ -26,7 +26,13 @@ public class BoardResponse {
         private String username;
         private String createdAt;
 
-        public DetailDto(Board board) {
+        private boolean premium;    // 유료 게시글 여부
+        private int price;          // 가격 (안내 문구용)
+        private boolean owner;      // 로그인 사용자의 작성자 여부
+        private boolean purchased;  // 로그인 사용자의 구매 여부
+        private boolean canRead;    // 본문 열람 가능 여부 (계산해서 내려보냄. 무료글 or 작성자 or 구매자)
+
+        public DetailDto(Board board, boolean owner, boolean purchased) {
             this.id = board.getId();
             this.title = board.getTitle();
             this.content = board.getContent();
@@ -36,9 +42,19 @@ public class BoardResponse {
                 this.userId = board.getUser().getId();
                 this.username = board.getUser().getUsername();
             }
-
             if (board.getCreatedAt() != null) {
                 this.createdAt = MyDateUtil.timestampFormat(board.getCreatedAt());
+            }
+
+            this.premium = board.isPremium();
+            this.price = 500;   // 추후 수정
+            this.owner = owner;
+            this.purchased = purchased;
+            this.canRead = !premium || owner || purchased;
+
+            // 읽을 수 있는 여부에 따라 내용을 지워 내려보내는 방법이 있다
+            if (! this.canRead) {
+                this.content = null;
             }
         }
     }
@@ -116,11 +132,13 @@ public class BoardResponse {
         private Long id;
         private String title;
         private String content;
+        private boolean premium;
 
         public UpdateFormDto(Board board) {
             this.id = board.getId();
             this.title = board.getTitle();
             this.content = board.getContent();
+            this.premium = board.isPremium();
         }
     }
 }
