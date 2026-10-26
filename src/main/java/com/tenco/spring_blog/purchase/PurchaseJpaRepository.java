@@ -40,6 +40,25 @@ public interface PurchaseJpaRepository extends JpaRepository<Purchase, Long> {
         @Param("boardId") Long boardId
     );
 
+
+    // 구매 1건 이상 확인
+    @Query("""
+    SELECT
+        CASE
+            WHEN COUNT(p) > 0 THEN
+                TRUE
+            ELSE
+                FALSE
+        END
+    FROM Purchase AS p
+    WHERE
+        p.board.id = :boardId
+""")
+    boolean existsByBoardId(
+            @Param("boardId") Long boardId
+    );
+
+
     // 게시글에 달린 구매 내역 일괄 삭제
     @Modifying
     @Query("""

@@ -1,5 +1,6 @@
 package com.tenco.spring_blog.board;
 
+import com.tenco.spring_blog._core.error.BoardPurchaseExistsException;
 import com.tenco.spring_blog._core.error.Exception403;
 import com.tenco.spring_blog._core.error.Exception404;
 import com.tenco.spring_blog.purchase.PurchaseJpaRepository;
@@ -151,6 +152,11 @@ public class BoardService {
             log.warn("게시글 삭제 권한 없음 - 게시글 ID: {}, 작성자: {}, 요청자: {}",
                     id, board.getUser().getUsername(), sessionUser.getUsername());
             throw new Exception403("본인이 작성한 게시글만 삭제할 수 있습니다.");
+        }
+
+        // 구매했으면 삭제불가
+        if (purchaseJpaRepository.existsByBoardId(id)) {
+            throw new BoardPurchaseExistsException("구입 이력이 존재하는 게시글은 삭제할 수 없습니다.");
         }
 
         // 게시글의 댓글 일괄 삭제
