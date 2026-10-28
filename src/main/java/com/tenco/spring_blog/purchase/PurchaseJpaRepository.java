@@ -1,5 +1,7 @@
 package com.tenco.spring_blog.purchase;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -63,4 +65,27 @@ public interface PurchaseJpaRepository extends JpaRepository<Purchase, Long> {
         @Param("boardId") Long boardId
     );
 
+    // 목록 : 구매 내역
+    @Query(value = """
+        SELECT
+            p
+        FROM Purchase AS p
+        JOIN FETCH
+            p.user AS u
+        JOIN FETCH
+            p.board AS b
+        JOIN FETCH
+            b.user AS bu
+        WHERE
+            u.id = :userId
+""", countQuery = """
+        SELECT
+            count(p)
+        FROM Purchase AS p
+        JOIN
+            p.user AS u
+        WHERE
+            u.id = :userId
+""")
+    Page<Purchase> findByUserIdJoinBoardAndUser(@Param(value = "userId") Long userId, Pageable pageable);
 }

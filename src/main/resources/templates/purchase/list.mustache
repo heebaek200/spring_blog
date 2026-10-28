@@ -1,0 +1,76 @@
+{{> layout/header}}
+
+<div class="container p-5">
+    <div class="card">
+        <div class="card-header"><b>구매 내역</b></div>
+
+        <div class="card-body">
+
+            {{#purchasePage.content}}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <a href="/board/{{boardId}}">{{boardTitle}}</a>
+                        <span class="badge bg-primary">-{{price}} P</span>
+                    </div>
+                    <div>
+                        👤작성자: {{boardUsername}}
+                    </div>
+                    <div>
+                        📅구매일: {{createdAt}}
+                    </div>
+                </div>
+            </div>
+            {{/purchasePage.content}}
+
+            {{! 페이지네이션 }}
+            {{#purchasePage.hasContent}}
+            <ul class="pagination d-flex justify-content-center">
+                {{#purchasePage.hasPrevious}}{{! 이전 }}
+                    <li class="page-item">
+                        <a class="page-link" href="/my/purchase?page={{purchasePage.previousPage}}&size={{purchasePage.size}}">이전</a>
+                    </li>
+                {{/purchasePage.hasPrevious}}
+                {{^purchasePage.hasPrevious}}
+                    <li class="page-item disabled"><a class="page-link">이전</a></li>
+                {{/purchasePage.hasPrevious}}
+
+                {{! 페이지 번호 }}
+                {{#purchasePage.pageLinks}}
+                    <li class="page-item {{#active}}active{{/active}}">
+                        <a class="page-link" href="/my/purchase?page={{number}}&size={{purchasePage.size}}">{{number}}</a>
+                    </li>
+                {{/purchasePage.pageLinks}}
+
+
+                {{#purchasePage.hasNext}}{{! 다음 }}
+                    <li class="page-item">
+                        <a class="page-link" href="/my/purchase?page={{purchasePage.NextPage}}&size={{purchasePage.size}}">다음</a>
+                    </li>
+                {{/purchasePage.hasNext}}
+                {{^purchasePage.hasNext}}
+                    <li class="page-item disabled"><a class="page-link">다음</a></li>
+                {{/purchasePage.hasNext}}
+            </ul>
+            {{/purchasePage.hasContent}}
+
+            {{! 구매 내역이 없을 때 }}
+            {{^purchasePage.content}}
+            <div class="mb-4 text-center">
+                <h1>🛒</h1>
+                <h3>구매 내역이 없습니다.</h3>
+                <p>유료 게시글을 구매해보세요!</p>
+                <div class="mb-4">
+                    <a href="/" class="btn btn-primary">게시글 목록으로</a>
+                </div>
+            </div>
+            {{/purchasePage.content}}
+
+            <div class="d-grid gap-2">
+                <a href="/user/detail" class="btn btn-secondary">회원 정보로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{> layout/footer}}
