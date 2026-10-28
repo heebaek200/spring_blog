@@ -1,0 +1,84 @@
+{{> layout/header}}
+
+<div class="container p-5">
+    <div class="card">
+        <div class="card-header"><b>결제 내역</b></div>
+
+        <div class="card-body">
+
+            {{#paymentPage.content}}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h4>결제 #{{id}}</h4>
+                        <span class="badge bg-primary fs-6">+{{amount}} P</span>
+                    </div>
+                    <div class="text-muted">
+                        <i class="fa-solid fa-receipt"></i> 주문번호: {{paymentId}}
+                    </div>
+                    {{#pgTxId}}
+                    <div class="text-muted">
+                        <i class="fa-solid fa-key"></i> 결제번호: {{pgTxId}}
+                    </div>
+                    {{/pgTxId}}
+                    <div class="text-muted">
+                        <i class="fa-solid fa-calendar"></i> 결제일: {{createdAt}}
+                    </div>
+                    <div class="text-muted">
+                        <i class="fa-solid fa-circle-info"></i> 상태: <span class="badge bg-success fs-7">{{paymentStatusDisplay}}</span>
+                    </div>
+                </div>
+            </div>
+            {{/paymentPage.content}}
+
+            {{! 페이지네이션 }}
+            {{#paymentPage.hasContent}}
+            <ul class="pagination d-flex justify-content-center">
+                {{#paymentPage.hasPrevious}}{{! 이전 }}
+                    <li class="page-item">
+                        <a class="page-link" href="/my/payment?page={{paymentPage.previousPage}}&size={{paymentPage.size}}">이전</a>
+                    </li>
+                {{/paymentPage.hasPrevious}}
+                {{^paymentPage.hasPrevious}}
+                    <li class="page-item disabled"><a class="page-link">이전</a></li>
+                {{/paymentPage.hasPrevious}}
+
+                {{! 페이지 번호 }}
+                {{#paymentPage.pageLinks}}
+                    <li class="page-item {{#active}}active{{/active}}">
+                        <a class="page-link" href="/my/payment?page={{number}}&size={{paymentPage.size}}">{{number}}</a>
+                    </li>
+                {{/paymentPage.pageLinks}}
+
+
+                {{#paymentPage.hasNext}}{{! 다음 }}
+                    <li class="page-item">
+                        <a class="page-link" href="/my/payment?page={{paymentPage.NextPage}}&size={{paymentPage.size}}">다음</a>
+                    </li>
+                {{/paymentPage.hasNext}}
+                {{^paymentPage.hasNext}}
+                    <li class="page-item disabled"><a class="page-link">다음</a></li>
+                {{/paymentPage.hasNext}}
+            </ul>
+            {{/paymentPage.hasContent}}
+
+            {{! 결제 내역이 없을 때 }}
+            {{^paymentPage.content}}
+            <div class="mb-4 text-center py-4">
+                <i class="fa-solid fa-cart-shopping fa-3x"></i>
+                <h3>결제 내역이 없습니다.</h3>
+                <p>포인트를 충전해보세요</p>
+                <div class="mb-4">
+                    <a href="/user/point/charge" class="btn btn-primary">포인트 충전하기</a>
+                </div>
+            </div>
+            {{/paymentPage.content}}
+
+            <div class="d-grid gap-2">
+                <a href="/user/detail" class="btn btn-secondary">회원 정보로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{> layout/footer}}
