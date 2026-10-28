@@ -6,6 +6,10 @@ import com.tenco.spring_blog.user.User;
 import com.tenco.spring_blog.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,5 +96,26 @@ public class PaymentService {
                 sessionUserId, paymentId, payment.getAmount());
 
         return new PaymentResponse.CompleteDto(payment.getAmount(), user.getPoint());
+    }
+
+    /**
+     * 결제 내역 조회
+     */
+    public PaymentResponse.PageDto findAllByUserId(Long sessionUserId, int page, int size) {
+        log.info("구매 내역 조회 시작");
+
+        // 1부터 시작하는 번호를 0부터로 변환
+        int pageIndex = Math.max(0, page - 1);
+
+        // 페이지 크기는 1 ~ 50으로 제한 (size=10000 같은 요청 방어)
+        int validSize = Math.clamp(size, 1, 50);
+
+        // 페이징 주문서 생성. 최신 구매가 먼저 오도록 id 내림차순 정렬.
+        Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
+
+        // 페이징 처리가 된  구매 내역 조회 요청 (주문 결과 Page)
+        Page<Payment> paymentPage = paymentJpaRepository.findAllByUserIdAndStatus(sessionUserId, PaymentStatus.PAID, pageable);
+
+        return new PaymentResponse.PageDto(paymentPage);
     }
 }

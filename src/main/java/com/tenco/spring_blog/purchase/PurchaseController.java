@@ -32,8 +32,6 @@ public class PurchaseController {
 
         model.addAttribute("purchasePage", pageDto);
 
-        log.debug("{}", pageDto);
-
         return "purchase/list";
     }
 

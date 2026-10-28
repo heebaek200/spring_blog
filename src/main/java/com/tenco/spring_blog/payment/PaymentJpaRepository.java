@@ -1,5 +1,8 @@
 package com.tenco.spring_blog.payment;
 
+import com.tenco.spring_blog.purchase.Purchase;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +34,18 @@ WHERE
 """)
     boolean existsByPaymentId(@Param("paymentId") String paymentId);
 
+    // 결제 내역 조회 (로그인 사용자)
+    @Query("""
+    SELECT
+        p
+    FROM Payment AS p
+    WHERE
+        p.user.id = :userId
+    AND p.status  = :status
+""")
+    Page<Payment> findAllByUserIdAndStatus(
+            @Param("userId") Long userId,
+            @Param("status") PaymentStatus status,
+            Pageable pageable
+    );
 }

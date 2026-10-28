@@ -69,5 +69,6 @@ public class Payment {
     public void markPaid(String pgTxId) {
         // 결제 상태를 완료로 변경
         this.status = PaymentStatus.PAID;
+        this.pgTxId = pgTxId;
     }
 }
