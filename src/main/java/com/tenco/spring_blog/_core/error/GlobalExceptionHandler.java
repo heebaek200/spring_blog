@@ -180,11 +180,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotEnoughPointException.class)
     @ResponseBody   // alert이 뜨도록 수정
-    public String notEnoughPointEx(
+    public String exNotEnoughPoint(
             NotEnoughPointException e,
             HttpServletRequest request
     ) {
-        log.warn("==== NotEnoughPointException 에러 발생 ====");
+        log.warn("==== 포인트 부족 에러 발생 ====");
         log.warn("요청 URL : {}", request.getRequestURL());
         log.warn("권한 오류 : {}", e.getMessage());
         log.warn("예외 클래스 : {}", e.getClass().getSimpleName());
@@ -193,7 +193,7 @@ public class GlobalExceptionHandler {
         return """
                 <script>
                     alert('%s');
-                    history.back();
+                    location.href = "/user/detail";
                 </script>
                 """.formatted(msg);
     }

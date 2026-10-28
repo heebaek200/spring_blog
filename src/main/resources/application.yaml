@@ -57,3 +57,8 @@ oauth:
 agent:
   gemini:
     api-key: ${GEMINI_API_KEY}
+pg-payment:
+  port-one:
+    store-id: ${PORTONE_STORE_ID:}
+    channel-key: ${PORTONE_CHANNER_KEY:}
+    api-secret: ${PORTONE_SECRET_KEY:}
