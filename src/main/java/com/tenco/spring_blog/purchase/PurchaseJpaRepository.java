@@ -65,7 +65,8 @@ public interface PurchaseJpaRepository extends JpaRepository<Purchase, Long> {
         @Param("boardId") Long boardId
     );
 
-    // 목록 : 구매 내역
+    // 구매 내역
+    // u : 구매자, bu : 작성자
     @Query(value = """
         SELECT
             p
@@ -77,7 +78,7 @@ public interface PurchaseJpaRepository extends JpaRepository<Purchase, Long> {
         JOIN FETCH
             b.user AS bu
         WHERE
-            u.id = :userId
+            p.user.id = :userId
 """, countQuery = """
         SELECT
             count(p)
@@ -85,7 +86,7 @@ public interface PurchaseJpaRepository extends JpaRepository<Purchase, Long> {
         JOIN
             p.user AS u
         WHERE
-            u.id = :userId
+            p.user.id = :userId
 """)
-    Page<Purchase> findByUserIdJoinBoardAndUser(@Param(value = "userId") Long userId, Pageable pageable);
+    Page<Purchase> findAllByUserIdJoinBoardAndAuthor(@Param(value = "userId") Long userId, Pageable pageable);
 }

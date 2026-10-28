@@ -28,7 +28,7 @@ public class PurchaseController {
     ) {
         SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
 
-        PurchaseResponse.PageDto pageDto = purchaseService.findByUserId(sessionUserDto.getId(), page, size);
+        PurchaseResponse.PageDto pageDto = purchaseService.findAllByUserId(sessionUserDto.getId(), page, size);
 
         model.addAttribute("purchasePage", pageDto);
 

@@ -9,15 +9,15 @@
             {{#purchasePage.content}}
             <div class="card mb-2">
                 <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
                         <a href="/board/{{boardId}}">{{boardTitle}}</a>
-                        <span class="badge bg-primary">-{{price}} P</span>
+                        <span class="badge bg-primary fs-6">-{{price}} P</span>
                     </div>
-                    <div>
-                        👤작성자: {{boardUsername}}
+                    <div class="text-muted">
+                        <i class="fa-solid fa-user"></i> 작성자: {{boardUsername}}
                     </div>
-                    <div>
-                        📅구매일: {{createdAt}}
+                    <div class="text-muted">
+                        <i class="fa-solid fa-calendar"></i> 구매일: {{createdAt}}
                     </div>
                 </div>
             </div>
@@ -56,8 +56,8 @@
 
             {{! 구매 내역이 없을 때 }}
             {{^purchasePage.content}}
-            <div class="mb-4 text-center">
-                <h1>🛒</h1>
+            <div class="mb-4 text-center py-4">
+                <i class="fa-solid fa-cart-shopping fa-3x"></i>
                 <h3>구매 내역이 없습니다.</h3>
                 <p>유료 게시글을 구매해보세요!</p>
                 <div class="mb-4">

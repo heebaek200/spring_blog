@@ -72,7 +72,7 @@ public class PurchaseService {
      * @param size 페이지 당 행 수
      * @return PageDto
      */
-    public PurchaseResponse.PageDto findByUserId(Long sessionUserId, int page, int size) {
+    public PurchaseResponse.PageDto findAllByUserId(Long sessionUserId, int page, int size) {
         log.info("구매 내역 조회 시작");
 
         // 1부터 시작하는 번호를 0부터로 변환
@@ -85,7 +85,7 @@ public class PurchaseService {
         Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
 
         // 페이징 처리가 된  구매 내역 조회 요청 (주문 결과 Page)
-        Page<Purchase> purchasePage = purchaseJpaRepository.findByUserIdJoinBoardAndUser(sessionUserId, pageable);
+        Page<Purchase> purchasePage = purchaseJpaRepository.findAllByUserIdJoinBoardAndAuthor(sessionUserId, pageable);
 
         // 조회 후 트랜잭션 안에서 응답 DTO로 변환처리
         return new PurchaseResponse.PageDto(purchasePage);
