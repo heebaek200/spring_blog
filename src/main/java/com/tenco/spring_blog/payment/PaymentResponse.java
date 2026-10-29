@@ -63,13 +63,22 @@ public class PaymentResponse {
         private String paymentStatusDisplay;
         private String createdAt;
 
-        public ListDto(Payment payment) {
+        private boolean cancelled;      // 환불 완료 결제인가 (배지 색 구분용)
+        private boolean refundable;     // 환불 요청 버튼 표시 여부
+
+        @Builder
+        public ListDto(Payment payment, List<Long> refundedPkList) {
             this.id = payment.getId();
             this.amount = payment.getAmount();
             this.paymentId = payment.getPaymentId();
             this.pgTxId = payment.getPgTxId();
             this.paymentStatusDisplay = payment.getStatus().getDisplayName();
             this.createdAt = MyDateUtil.timestampFormat(payment.getCreatedAt());
+
+            this.cancelled = payment.getStatus() == PaymentStatus.CANCELLED;
+
+            // 환불 가능 여부
+            this.refundable = payment.isPaid() && !refundedPkList.contains(this.id);
         }
     }
 
@@ -96,8 +105,8 @@ public class PaymentResponse {
         private int nextPage;
         private List<PaymentResponse.PageLink> pageLinks;  // 화면에 표시할 페이지 번호 목록
 
-        public PageDto(Page<Payment> page) {
-            this.content = page.getContent().stream().map(PaymentResponse.ListDto::new).toList();
+        public PageDto(Page<Payment> page, List<Long> refundedPkList) {
+            this.content = page.getContent().stream().map(x -> new PaymentResponse.ListDto(x, refundedPkList)).toList();
             this.hasContent = ! content.isEmpty();
             this.size = page.getSize();
             this.currentPage = page.getNumber() + 1;    // 0-base to 1-base
