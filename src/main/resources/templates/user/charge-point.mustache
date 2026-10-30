@@ -74,7 +74,7 @@
             const prepare = await prepareResponse.json();
 
             if (! prepareResponse.ok) {
-                alert("잘못된 요청입니다.");
+                throw new Error(prepare.message);
             }
 
             // 포트원 결제창 호출 (카카오페이 간편결제)
@@ -95,6 +95,7 @@
             // 결제 실패나 취소 시 응답에 code 포함
             if (! paymentRes || paymentRes.code !== undefined) {
                 alert("결제가 완료되지 않았습니다.");
+                return;
             }
 
             // 서버 검증 요청
@@ -110,7 +111,7 @@
 
             const result = await completeRes.json();
             if (! completeRes.ok) {
-                alert("포인트 충전에 실패했습니다.");
+                throw new Error(result.message);
             }
 
             alert(`충전이 완료되었습니다.
@@ -119,7 +120,8 @@
 `);
             location.href = "/user/detail";
         } catch (e) {
-            alert(`${e.message} : 서버와 통신하지 못했습니다.`);
+            console.error(e.message);
+            alert("서버와 통신하지 못했습니다.");
         } finally {
             chargeButton.disabled = false;
         }
