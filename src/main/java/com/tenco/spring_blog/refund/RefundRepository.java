@@ -50,7 +50,27 @@ ORDER BY
     );
 
     // 관리자 전체 환불 요청 목록
+    @Query("""
+    SELECT
+        r
+    FROM
+        Refund AS r
+    JOIN FETCH r.user
+    JOIN FETCH r.payment
+    ORDER BY r.id DESC
+""")
+    List<Refund> findAllJoinUserAndPayment();
 
-    // 관리자가 승인할 환불 요청 1건 정보 조회
+    // 관리자가 승인할 환불 요청 1건 정보 조회 - 유저 정보 포함
+    @Query("""
+SELECT
+    r
+FROM Refund AS r
+JOIN FETCH r.user
+JOIN FETCH r.payment
+WHERE
+    r.id = :id
+""")
+    Optional<Refund> findByIdJoinUserAndPayment(@Param("id") Long id);
 
 }

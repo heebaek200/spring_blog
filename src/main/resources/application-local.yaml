@@ -18,7 +18,7 @@ spring:
   jpa:
     hibernate:
       # 운영환경에서는 create를 쓰지 않습니다. 없는 테이블과 컬럼만 추가합니다.
-      ddl-auto: create
+      ddl-auto: update
     # 실행되는 SQL을 콘솔에 출력한다.
     show-sql: true
     properties:
@@ -30,6 +30,6 @@ spring:
   # 서버 시작 시 이 파일 실행
   sql:
     init:
-      mode: always
+      mode: never
       data-locations:
         - classpath:db/data.sql
