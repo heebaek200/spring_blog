@@ -11,7 +11,21 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <h4>결제 #{{id}}</h4>
-                        <span class="badge bg-primary fs-6">+{{amount}} P</span>
+                        <span>
+                            {{^cancelled}}
+                            <span class="badge bg-primary fs-6">+{{amount}} P</span>
+                            {{/cancelled}}
+                            {{#cancelled}}
+                            <span class="badge bg-secondary fs-6 text-decoration-line-through">+{{amount}} P</span>
+                            {{/cancelled}}
+
+                            {{! 환불 여부}}
+                            {{#refundable}}
+                            {{! 환불 요청 폼 태그 이동(결제PK 기준)}}
+                            <a href="/my/refund/request/{{id}}" class="d-block mt-2 btn btn-outline-danger btn-sm">환불 요청</a>
+                            {{/refundable}}
+
+                        </span>
                     </div>
                     <div class="text-muted">
                         <i class="fa-solid fa-receipt"></i> 주문번호: {{paymentId}}
@@ -25,7 +39,11 @@
                         <i class="fa-solid fa-calendar"></i> 결제일: {{createdAt}}
                     </div>
                     <div class="text-muted">
-                        <i class="fa-solid fa-circle-info"></i> 상태: <span class="badge bg-success fs-7">{{paymentStatusDisplay}}</span>
+
+                        {{! 결제 완료 / 환불 완료 }}
+                        <p class="text-muted mb-0">
+                            <i class="fa-solid fa-circle-info"></i> 상태: <span class="badge {{^cancelled}}bg-success{{/cancelled}}{{#cancelled}}bg-secondary{{/cancelled}} fs-7">{{paymentStatusDisplay}}</span>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -75,6 +93,7 @@
             {{/paymentPage.content}}
 
             <div class="d-grid gap-2">
+                <a href="/my/refund" class="btn btn-info"><i class="fa-solid fa-rotate-left"></i> 환불 요청 내역</a>
                 <a href="/user/detail" class="btn btn-secondary">회원 정보로 돌아가기</a>
             </div>
         </div>

@@ -71,4 +71,8 @@ public class Payment {
         this.status = PaymentStatus.PAID;
         this.pgTxId = pgTxId;
     }
+
+    public void markCancelled() {
+        this.status = PaymentStatus.CANCELLED;
+    }
 }

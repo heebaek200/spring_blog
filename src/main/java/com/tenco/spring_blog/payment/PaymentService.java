@@ -2,6 +2,7 @@ package com.tenco.spring_blog.payment;
 
 import com.tenco.spring_blog._core.error.Exception400;
 import com.tenco.spring_blog._core.error.Exception403;
+import com.tenco.spring_blog.refund.RefundRepository;
 import com.tenco.spring_blog.user.User;
 import com.tenco.spring_blog.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -23,6 +25,7 @@ public class PaymentService {
     
     private final PaymentJpaRepository paymentJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private final RefundRepository refundRepository;
 
     /**
      *  1단계 : 결제건 생성
@@ -114,8 +117,12 @@ public class PaymentService {
         Pageable pageable = PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
 
         // 페이징 처리가 된  구매 내역 조회 요청 (주문 결과 Page)
-        Page<Payment> paymentPage = paymentJpaRepository.findAllByUserIdAndStatus(sessionUserId, PaymentStatus.PAID, pageable);
+        Page<Payment> paymentPage = paymentJpaRepository.findAllByUserIdAndStatusList(sessionUserId,
+                List.of(PaymentStatus.PAID, PaymentStatus.CANCELLED), pageable);
 
-        return new PaymentResponse.PageDto(paymentPage);
+        // 환불 가능 여부 판별을 위해 환불 pk 정보 모음 -> ListDto 생성자에서 판별
+        List<Long> refundedPkList = refundRepository.findPaymentPkListByUserId(sessionUserId);
+
+        return new PaymentResponse.PageDto(paymentPage, refundedPkList);
     }
 }
